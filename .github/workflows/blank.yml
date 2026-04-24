@@ -33,21 +33,23 @@ jobs:
 
       - name: 📦 Restore & Build APK
         run: |
-          # Busca automática do arquivo de projeto para evitar erro de caminho
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
           
           if [ -z "$PROJECT_FILE" ]; then
-            echo "❌ ERRO: Nenhum arquivo .csproj encontrado no repositório!"
+            echo "❌ ERRO: Arquivo .csproj não encontrado!"
             exit 1
           fi
           
           echo "🚀 Projeto encontrado: $PROJECT_FILE"
           
-          dotnet restore "$PROJECT_FILE"
+          # Restaurar com a flag para ignorar erro de fim de suporte
+          dotnet restore "$PROJECT_FILE" -p:CheckEolTargetFramework=false
           
+          # Build com a flag para ignorar erro de fim de suporte
           dotnet publish "$PROJECT_FILE" \
             -f net8.0-android \
             -c Release \
+            -p:CheckEolTargetFramework=false \
             -p:AndroidPackageFormat=apk \
             -p:AndroidKeyStore=false \
             -p:EmbedAssembliesIntoApk=true \
