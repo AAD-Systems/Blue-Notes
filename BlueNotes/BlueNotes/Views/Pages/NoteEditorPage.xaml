@@ -132,12 +132,12 @@
                         <LinearItemsLayout Orientation="Horizontal" ItemSpacing="6"/>
                     </CollectionView.ItemsLayout>
                     <CollectionView.ItemTemplate>
-                        <DataTemplate>
-                            <Frame Style="{StaticResource TagChip}">
-                                <Label Text="{Binding Name}" FontSize="12"
-                                       TextColor="{StaticResource TextPrimary}"/>
-                            </Frame>
-                        </DataTemplate>
+                        <DataTemplate x:DataType="models:Tag"> <Frame Style="{StaticResource TagChip}">
+        <Label Text="{Binding Name}" FontSize="12"
+               TextColor="{StaticResource TextPrimary}"/>
+    </Frame>
+</DataTemplate>
+
                     </CollectionView.ItemTemplate>
                 </CollectionView>
             </HorizontalStackLayout>
