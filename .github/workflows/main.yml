@@ -25,30 +25,26 @@ jobs:
 
       - name: 📦 Install Workloads
         run: |
-          # A ordem dos fatores aqui altera o produto no CLI do .NET
-          dotnet workload install maui-android --accept-license-agreements
+          # Comando limpo e direto
+          dotnet workload install maui-android
 
       - name: 🔨 Build APK
         run: |
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
-          # 'build' limpo com flags explícitas para gerar o arquivo físico
-          dotnet build "$PROJECT_FILE" -c Release -f net9.0-android \
-            -p:PublishAndroidPackage=true \
-            -p:AndroidPackageFormat=apk \
-            -p:AndroidKeyStore=false
+          # Build forçando a criação do arquivo APK
+          dotnet build "$PROJECT_FILE" -c Release -f net9.0-android -p:PublishAndroidPackage=true -p:AndroidPackageFormat=apk -p:AndroidKeyStore=false
 
       - name: 🔍 Collect Artifact
         run: |
           mkdir -p drop
-          # Busca profunda para ignorar a estrutura de pastas do .NET 9
           find . -name "*.apk" -type f -exec cp {} ./drop/ \;
-          echo "📂 Arquivos capturados:"
+          echo "📂 Arquivos encontrados:"
           ls -R ./drop
 
       - name: 📤 Upload
         uses: actions/upload-artifact@v4
         with:
-          name: BlueNotes-App-Package
+          name: BlueNotes-App
           path: drop/
           if-no-files-found: error
           
