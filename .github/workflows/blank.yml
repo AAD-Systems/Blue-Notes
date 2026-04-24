@@ -1,73 +1,41 @@
-name: 🔵 Blue Notes — Build & Release APK
-
+name: 🔵 Blue Notes — Build APK
 on:
   push:
     branches: [ "main" ]
   workflow_dispatch:
-
 env:
   DOTNET_VERSION: '8.0.x'
-
 jobs:
   build-android:
-    name: 📦 Build Android APK
     runs-on: ubuntu-latest
-
     steps:
-      - name: ⬇️ Checkout code
-        uses: actions/checkout@v4
-
-      - name: 🛠️ Force .NET 8 SDK
-        run: |
-          echo '{"sdk": {"version": "8.0.400", "rollForward": "latestFeature"}}' > global.json
-
-      - name: 🛠️ Setup .NET
-        uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v4
+      - name: 🛠️ SDK 8
+        run: echo '{"sdk":{"version":"8.0.400","rollForward":"latestFeature"}}' > global.json
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: ☕ Setup Java 17
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-
-      - name: 🛠️ Bypass EOL & Version Mismatch
+      - name: 🛠️ Bypass
         run: |
           PROJECT_DIR=$(find . -name "*.csproj" -exec dirname {} \;)
           for dir in $PROJECT_DIR; do
-            echo "<Project>
-              <PropertyGroup>
-                <CheckEolTargetFramework>false</CheckEolTargetFramework>
-                <SupportedOSPlatformVersion>24.0</SupportedOSPlatformVersion>
-              </PropertyGroup>
-            </Project>" > "$dir/Directory.Build.props"
+            echo "<Project><PropertyGroup><CheckEolTargetFramework>false</CheckEolTargetFramework><SupportedOSPlatformVersion>24.0</SupportedOSPlatformVersion></PropertyGroup></Project>" > "$dir/Directory.Build.props"
           done
-
-      - name: 📦 Restore Workloads & Project
+      - name: 📦 Workload & Restore
         run: |
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
-          echo "🚀 Projeto encontrado: $PROJECT_FILE"
           dotnet workload restore "$PROJECT_FILE"
           dotnet restore "$PROJECT_FILE" -p:CheckEolTargetFramework=false
-
-      - name: 🔨 Build & Publish APK
+      - name: 🔨 Publish
         run: |
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
-          
-          dotnet publish "$PROJECT_FILE" \
-            -f net8.0-android \
-            -c Release \
-            -p:CheckEolTargetFramework=false \
-            -p:AndroidPackageFormat=apk \
-            -p:AndroidKeyStore=false \
-            -p:EmbedAssembliesIntoApk=true \
-            -o ./artifacts/
-
-      - name: 📤 Upload APK
-        uses: actions/upload-artifact@v4
+          dotnet publish "$PROJECT_FILE" -f net8.0-android -c Release -p:CheckEolTargetFramework=false -p:AndroidPackageFormat=apk -p:AndroidKeyStore=false -p:EmbedAssembliesIntoApk=true -o ./artifacts/
+      - uses: actions/upload-artifact@v4
         with:
           name: BlueNotes-APK
           path: ./artifacts/**/*.apk
-          retention-days: 30
 		  
