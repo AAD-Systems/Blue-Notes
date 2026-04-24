@@ -5,6 +5,10 @@ on:
   workflow_dispatch:
 env:
   DOTNET_VERSION: '8.0.x'
+  # FORÇA O SDK A IGNORAR O FIM DE SUPORTE NO NÍVEL DO SISTEMA
+  DOTNET_GENERATE_ASPNET_CORE_HTTPS_CHECK: 'false'
+  CheckEolTargetFramework: 'false'
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -22,30 +26,41 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: 📝 Config Override
+        run: |
+          # Cria um arquivo de configuração que o .NET é obrigado a ler antes de tudo
+          echo "export MSBUILDDISABLENODEREUSE=1" >> $GITHUB_ENV
+          echo "export CheckEolTargetFramework=false" >> $GITHUB_ENV
+          
+          # Injeta a propriedade diretamente em um arquivo de props global
+          PROJECT_DIR=$(find . -name "*.csproj" -exec dirname {} \;)
+          echo '<Project><PropertyGroup><CheckEolTargetFramework>false</CheckEolTargetFramework></PropertyGroup></Project>' > "$PROJECT_DIR/Directory.Build.props"
+
       - name: 📦 Install Workloads & Restore
         run: |
-          dotnet workload install maui-android
+          # Desabilita o erro explicitamente na chamada do workload
+          dotnet workload install maui-android --configfile NuGet.config || dotnet workload install maui-android
+          
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
-          # A FLAG MÁGICA AQUI:
           dotnet restore "$PROJECT_FILE" -p:CheckEolTargetFramework=false
 
-      - name: 🔨 Build APK (Ignore Support Warning)
+      - name: 🔨 Build APK (Ultimate Force)
         run: |
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
-          echo "🚀 Compilando: $PROJECT_FILE"
           
-          # A FLAG MÁGICA AQUI TAMBÉM:
+          # Build usando flags redundantes para garantir
           dotnet build "$PROJECT_FILE" -c Release -f net8.0-android /t:Publish \
-            /p:AndroidPackageFormat=apk \
-            /p:AndroidKeyStore=false \
-            /p:CheckEolTargetFramework=false
+            -p:AndroidPackageFormat=apk \
+            -p:AndroidKeyStore=false \
+            -p:CheckEolTargetFramework=false \
+            -p:SupportedOSPlatformVersion=24.0
 
       - name: 🔍 Collect Artifact
         run: |
           mkdir -p drop
           find . -name "*-Signed.apk" -exec cp {} ./drop/ \;
           find . -name "*.apk" -exec cp {} ./drop/ \;
-          echo "📂 Drop folder content:"
+          echo "📂 Arquivos na pasta drop:"
           ls -R ./drop
 
       - name: 📤 Upload
