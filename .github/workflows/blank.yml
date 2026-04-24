@@ -4,7 +4,7 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 env:
-  DOTNET_VERSION: '9.0.x' # AGORA USAMOS O .NET 9 OFICIAL
+  DOTNET_VERSION: '9.0.x'
 
 jobs:
   build:
@@ -32,7 +32,7 @@ jobs:
       - name: 🔨 Build APK
         run: |
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
-          # O build limpo, sem precisar forçar ignorar erros
+          # O publish garante que todas as dependências do Android sejam empacotadas
           dotnet publish "$PROJECT_FILE" -f net9.0-android -c Release \
             -p:AndroidPackageFormat=apk \
             -p:AndroidKeyStore=false
@@ -40,8 +40,10 @@ jobs:
       - name: 🔍 Collect Artifact
         run: |
           mkdir -p drop
-          find . -name "*.apk" -exec cp {} ./drop/ \;
-          echo "📂 Arquivos encontrados:"
+          # Comando "rastreador": busca qualquer APK no servidor e joga na pasta drop
+          find . -name "*.apk" -type f -exec cp {} ./drop/ \;
+          
+          echo "📂 Arquivos capturados:"
           ls -R ./drop
 
       - name: 📤 Upload
@@ -49,4 +51,5 @@ jobs:
         with:
           name: BlueNotes-APK-Net9
           path: drop/
+          if-no-files-found: error
           
