@@ -12,15 +12,13 @@
     <ApplicationVersion>1</ApplicationVersion>
     <AssemblyName>BlueNotes</AssemblyName>
 
-    <MauiEnableXamlCBindingWithSourceCompilation>true
-    </MauiEnableXamlCBindingWithSourceCompilation>
-
+    <MauiEnableXamlCBindingWithSourceCompilation>true</MauiEnableXamlCBindingWithSourceCompilation>
 
     <PublishAndroidPackage>true</PublishAndroidPackage>
     <AndroidPackageFormat>apk</AndroidPackageFormat>
     <AndroidGenerateAppBundle>false</AndroidGenerateAppBundle>
     <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
-    
+
     <AndroidUseAssemblyStore>false</AndroidUseAssemblyStore>
     <AndroidEnableAssemblyCompression>false</AndroidEnableAssemblyCompression>
     <RunAOTCompilation>false</RunAOTCompilation>
@@ -28,7 +26,8 @@
     <IncrementalPackaging>false</IncrementalPackaging>
 
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
-    <TargetSdkVersion>35</TargetSdkVersion> </PropertyGroup>
+    <TargetSdkVersion>35</TargetSdkVersion> 
+  </PropertyGroup>
 
   <ItemGroup>
     <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#0D1B2A" />
