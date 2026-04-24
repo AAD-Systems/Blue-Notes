@@ -30,17 +30,16 @@ jobs:
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
           dotnet workload restore "$PROJECT_FILE"
           dotnet restore "$PROJECT_FILE" -p:CheckEolTargetFramework=false
-      - name: Publish
+      - name: Build_APK
         run: |
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
-          # Removi o -o ./artifacts/ para o MAUI usar o caminho padrão dele
-          dotnet publish "$PROJECT_FILE" -f net8.0-android -c Release -p:CheckEolTargetFramework=false -p:AndroidPackageFormat=apk -p:AndroidKeyStore=false -p:EmbedAssembliesIntoApk=true
+          # Mudamos para 'dotnet build' com target de Publish para garantir o APK
+          dotnet build "$PROJECT_FILE" -c Release -f net8.0-android -t:Publish -p:CheckEolTargetFramework=false -p:AndroidPackageFormat=apk -p:AndroidKeyStore=false
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: BlueNotes-APK
-          # Agora ele busca em toda a pasta bin, garantindo que acha o APK
           path: |
-            **/bin/Release/**-Signed.apk
-            **/bin/Release/**/*.apk
+            **/*-Signed.apk
+            **/*.apk
             
