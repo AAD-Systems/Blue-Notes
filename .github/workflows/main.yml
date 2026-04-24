@@ -24,27 +24,30 @@ jobs:
       - name: 📦 Install Workload
         run: dotnet workload install maui-android
 
-      - name: 🔨 Build APK (Force Package)
+      - name: 🔨 Build APK (Brute Force)
         run: |
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
-          dotnet publish "$PROJECT_FILE" -f net9.0-android -c Release \
+          # Usando flags que forçam o targets do Android a gerar o APK sem frescura
+          dotnet build "$PROJECT_FILE" -c Release -f net9.0-android \
             -p:AndroidPackageFormat=apk \
             -p:AndroidKeyStore=false \
-            -p:CreatePackage=true \
-            -p:OutputItemType=Apk
+            -p:IntermediateOutputPath=obj/Release/net9.0-android/ \
+            -p:PublishAndroidPackage=true \
+            -t:SignAndroidPackage
 
-      - name: 🔍 Debug & Collect
+      - name: 🔍 Collect Artifact
         run: |
           mkdir -p drop
-          # Procura qualquer arquivo .apk no servidor inteiro e move pro drop
+          # No .NET 9 o APK fica escondido na pasta 'signed' mesmo sem chave
+          find . -name "*-Signed.apk" -type f -exec cp {} ./drop/ \;
           find . -name "*.apk" -type f -exec cp {} ./drop/ \;
-          echo "📂 Arquivos encontrados para download:"
+          echo "📂 Conteúdo final do drop:"
           ls -R ./drop
 
       - name: 📤 Upload
         uses: actions/upload-artifact@v4
         with:
-          name: BlueNotes-Install
+          name: BlueNotes-Install-Package
           path: drop/
           if-no-files-found: error
           
