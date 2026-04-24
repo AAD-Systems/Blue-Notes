@@ -29,24 +29,23 @@ jobs:
         run: |
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
           dotnet workload restore "$PROJECT_FILE"
-          dotnet restore "$PROJECT_FILE" -p:CheckEolTargetFramework=false
-      - name: Build_APK
+      
+      - name: 🔨 Build & Force APK
         run: |
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
-          # ESTAS DUAS FLAGS SÃO O SEGREDO:
-          dotnet publish "$PROJECT_FILE" -c Release -f net8.0-android \
-            -p:CheckEolTargetFramework=false \
-            -p:AndroidPackageFormat=apk \
-            -p:AndroidKeyStore=false \
-            -p:UnpackReleaseAdsLabels=true
-      - name: 🔍 Collect Artifacts
+          # O segredo: usamos 'build' com '/t:Publish' e forçamos o formato APK
+          dotnet build "$PROJECT_FILE" -c Release -f net8.0-android /t:Publish -p:AndroidPackageFormat=apk -p:AndroidKeyStore=false -p:CheckEolTargetFramework=false
+
+      - name: 🔍 Debug & Collect
         run: |
           mkdir -p drop
-          echo "📂 Buscando arquivos gerados..."
+          echo "🔎 Procurando arquivos na pasta bin..."
+          # Lista recursivamente tudo que foi gerado para o log
+          find . -path "*/bin/Release/*" -type f
+          # Copia qualquer APK ou AAB que encontrar
           find . -name "*.apk" -exec cp {} ./drop/ \;
           find . -name "*.aab" -exec cp {} ./drop/ \;
-          echo "Conteúdo da pasta drop:"
-          ls ./drop
+
       - name: 📤 Upload
         uses: actions/upload-artifact@v4
         with:
