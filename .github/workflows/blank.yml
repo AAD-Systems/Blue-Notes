@@ -4,12 +4,11 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 env:
-  DOTNET_VERSION: '8.0.x'
+  DOTNET_VERSION: '9.0.x' # AGORA USAMOS O .NET 9 OFICIAL
 
 jobs:
   build:
-    # MUDANÇA CRUCIAL: Saindo do ubuntu-latest para o 22.04
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -24,26 +23,23 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 📦 Workload & Restore
+      - name: 📦 Install Workloads & Restore
         run: |
           dotnet workload install maui-android
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
-          dotnet restore "$PROJECT_FILE" -p:CheckEolTargetFramework=false
+          dotnet restore "$PROJECT_FILE"
 
-      - name: 🔨 Build APK (The Last Stand)
+      - name: 🔨 Build APK
         run: |
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
-          # Usamos o publish porque ele é mais completo para gerar o binário final
-          dotnet publish "$PROJECT_FILE" -f net8.0-android -c Release \
+          # O build limpo, sem precisar forçar ignorar erros
+          dotnet publish "$PROJECT_FILE" -f net9.0-android -c Release \
             -p:AndroidPackageFormat=apk \
-            -p:AndroidKeyStore=false \
-            -p:CheckEolTargetFramework=false \
-            -p:SupportedOSPlatformVersion=24.0
+            -p:AndroidKeyStore=false
 
       - name: 🔍 Collect Artifact
         run: |
           mkdir -p drop
-          # Busca profunda por APKs
           find . -name "*.apk" -exec cp {} ./drop/ \;
           echo "📂 Arquivos encontrados:"
           ls -R ./drop
@@ -51,6 +47,6 @@ jobs:
       - name: 📤 Upload
         uses: actions/upload-artifact@v4
         with:
-          name: BlueNotes-APK-U22
+          name: BlueNotes-APK-Net9
           path: drop/
           
