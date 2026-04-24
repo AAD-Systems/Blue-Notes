@@ -24,28 +24,31 @@ jobs:
           distribution: 'temurin'
 
       - name: 📦 Install Workloads
-        # A flag deve vir DEPOIS do comando install, mas o segredo é o comando 'update' antes
         run: |
+          # A ordem dos fatores aqui altera o produto no CLI do .NET
           dotnet workload install maui-android --accept-license-agreements
 
       - name: 🔨 Build APK
         run: |
-          # Busca o arquivo do projeto automaticamente
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
-          # Build direto que força a criação do APK
-          dotnet build "$PROJECT_FILE" -c Release -f net9.0-android -p:PublishAndroidPackage=true -p:AndroidPackageFormat=apk -p:AndroidKeyStore=false
+          # 'build' limpo com flags explícitas para gerar o arquivo físico
+          dotnet build "$PROJECT_FILE" -c Release -f net9.0-android \
+            -p:PublishAndroidPackage=true \
+            -p:AndroidPackageFormat=apk \
+            -p:AndroidKeyStore=false
 
       - name: 🔍 Collect Artifact
         run: |
           mkdir -p drop
+          # Busca profunda para ignorar a estrutura de pastas do .NET 9
           find . -name "*.apk" -type f -exec cp {} ./drop/ \;
-          echo "📂 Arquivos encontrados:"
+          echo "📂 Arquivos capturados:"
           ls -R ./drop
 
       - name: 📤 Upload
         uses: actions/upload-artifact@v4
         with:
-          name: BlueNotes-APK
+          name: BlueNotes-App-Package
           path: drop/
           if-no-files-found: error
           
