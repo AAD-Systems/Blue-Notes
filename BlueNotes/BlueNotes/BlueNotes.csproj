@@ -12,25 +12,20 @@
     <ApplicationVersion>1</ApplicationVersion>
     <AssemblyName>BlueNotes</AssemblyName>
 
-    <MauiEnableXamlCBindingWithSourceCompilation>true</MauiEnableXamlCBindingWithSourceCompilation>
-
     <AndroidUseAssemblyStore>false</AndroidUseAssemblyStore>
     <AndroidEnableAssemblyCompression>false</AndroidEnableAssemblyCompression>
     <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
     <BundleAssemblies>false</BundleAssemblies>
     <EnableAssemblyILStripping>false</EnableAssemblyILStripping>
-    
+
     <PublishAndroidPackage>true</PublishAndroidPackage>
     <AndroidPackageFormat>apk</AndroidPackageFormat>
     <AndroidGenerateAppBundle>false</AndroidGenerateAppBundle>
     <RunAOTCompilation>false</RunAOTCompilation>
-    <AndroidLinkMode>None</AndroidLinkMode> 
-    <IncrementalPackaging>false</IncrementalPackaging>
+    <AndroidLinkMode>None</AndroidLinkMode>
 
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
     <TargetSdkVersion>35</TargetSdkVersion>
-    
-    <LanguageTargets Condition="'$(LanguageTargets)' == ''">$(MSBuildExtensionsPath)\Microsoft\Xamarin\Android\Xamarin.Android.CSharp.targets</LanguageTargets>
   </PropertyGroup>
 
   <ItemGroup>
