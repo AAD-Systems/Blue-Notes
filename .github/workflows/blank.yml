@@ -17,6 +17,11 @@ jobs:
       - name: ⬇️ Checkout code
         uses: actions/checkout@v4
 
+      - name: 🛠️ Force .NET 8 SDK
+        run: |
+          # Isso obriga o Runner a usar o SDK 8 e ignorar o SDK 10 que está pré-instalado
+          echo '{"sdk": {"version": "8.0.400", "rollForward": "latestFeature"}}' > global.json
+
       - name: 🛠️ Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -28,14 +33,17 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 🛠️ Global Config Bypass
+      - name: 🛠️ Bypass EOL Block
         run: |
-          echo '<Project>
-            <PropertyGroup>
-              <CheckEolTargetFramework>false</CheckEolTargetFramework>
-              <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
-            </PropertyGroup>
-          </Project>' > Directory.Build.props
+          # Criando o arquivo de configuração exatamente onde o projeto está
+          PROJECT_DIR=$(find . -name "*.csproj" -exec dirname {} \;)
+          for dir in $PROJECT_DIR; do
+            echo '<Project>
+              <PropertyGroup>
+                <CheckEolTargetFramework>false</CheckEolTargetFramework>
+              </PropertyGroup>
+            </Project>' > "$dir/Directory.Build.props"
+          done
 
       - name: 📲 Install Android Workload
         run: dotnet workload install android --ignore-failed-sources
@@ -45,8 +53,10 @@ jobs:
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
           echo "🚀 Projeto encontrado: $PROJECT_FILE"
           
+          # Executa o restore e ignora erros de suporte (EOL)
           dotnet restore "$PROJECT_FILE" -p:CheckEolTargetFramework=false
           
+          # Publica o APK
           dotnet publish "$PROJECT_FILE" \
             -f net8.0-android \
             -c Release \
