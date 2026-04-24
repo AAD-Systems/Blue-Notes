@@ -12,6 +12,10 @@
     <ApplicationVersion>1</ApplicationVersion>
     <AssemblyName>BlueNotes</AssemblyName>
 
+    <MauiEnableXamlCBindingWithSourceCompilation>true
+    </MauiEnableXamlCBindingWithSourceCompilation>
+
+
     <PublishAndroidPackage>true</PublishAndroidPackage>
     <AndroidPackageFormat>apk</AndroidPackageFormat>
     <AndroidGenerateAppBundle>false</AndroidGenerateAppBundle>
