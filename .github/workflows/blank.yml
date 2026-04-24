@@ -36,12 +36,13 @@ jobs:
         run: |
           PROJECT_DIR=$(find . -name "*.csproj" -exec dirname {} \;)
           for dir in $PROJECT_DIR; do
-            echo '<Project>
+            # Usando uma string sem aspas internas para evitar erro de parse no Bash
+            echo "<Project>
               <PropertyGroup>
                 <CheckEolTargetFramework>false</CheckEolTargetFramework>
-                <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == 'net8.0-android'">24.0</SupportedOSPlatformVersion>
+                <SupportedOSPlatformVersion>24.0</SupportedOSPlatformVersion>
               </PropertyGroup>
-            </Project>' > "$dir/Directory.Build.props"
+            </Project>" > "$dir/Directory.Build.props"
           done
 
       - name: 📦 Restore Workloads & Project
@@ -70,4 +71,4 @@ jobs:
           name: BlueNotes-APK
           path: ./artifacts/**/*.apk
           retention-days: 30
-          
+		  
