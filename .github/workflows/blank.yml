@@ -25,26 +25,27 @@ jobs:
       - name: 📦 Install Workloads & Restore
         run: |
           dotnet workload install maui-android
-          # Busca o projeto para garantir que o restore funcione na pasta certa
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
-          dotnet restore "$PROJECT_FILE"
+          # A FLAG MÁGICA AQUI:
+          dotnet restore "$PROJECT_FILE" -p:CheckEolTargetFramework=false
 
-      - name: 🔨 Build APK (Nuclear + Path Fix)
+      - name: 🔨 Build APK (Ignore Support Warning)
         run: |
-          # Localiza o arquivo de projeto novamente
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
-          echo "🚀 Compilando o projeto encontrado em: $PROJECT_FILE"
+          echo "🚀 Compilando: $PROJECT_FILE"
           
-          # Executa o build nuclear apontando para o arquivo específico
-          dotnet build "$PROJECT_FILE" -c Release -f net8.0-android /t:Publish /p:AndroidPackageFormat=apk /p:AndroidKeyStore=false
+          # A FLAG MÁGICA AQUI TAMBÉM:
+          dotnet build "$PROJECT_FILE" -c Release -f net8.0-android /t:Publish \
+            /p:AndroidPackageFormat=apk \
+            /p:AndroidKeyStore=false \
+            /p:CheckEolTargetFramework=false
 
       - name: 🔍 Collect Artifact
         run: |
           mkdir -p drop
-          # Busca recursiva para garantir que pegamos o APK independente de onde ele caiu
           find . -name "*-Signed.apk" -exec cp {} ./drop/ \;
           find . -name "*.apk" -exec cp {} ./drop/ \;
-          echo "📂 Conteúdo da pasta drop para upload:"
+          echo "📂 Drop folder content:"
           ls -R ./drop
 
       - name: 📤 Upload
