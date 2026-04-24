@@ -3,8 +3,6 @@ on:
   push:
     branches: [ "main" ]
   workflow_dispatch:
-env:
-  DOTNET_VERSION: '9.0.x'
 
 jobs:
   build:
@@ -15,7 +13,7 @@ jobs:
       - name: 🛠️ Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+          dotnet-version: '9.0.x'
 
       - name: ☕ Setup Java 17
         uses: actions/setup-java@v4
@@ -23,28 +21,30 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 📦 Install Workloads
-        run: |
-          # Comando limpo e direto
-          dotnet workload install maui-android
+      - name: 📦 Install Workload
+        run: dotnet workload install maui-android
 
-      - name: 🔨 Build APK
+      - name: 🔨 Build APK (Force Package)
         run: |
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
-          # Build forçando a criação do arquivo APK
-          dotnet build "$PROJECT_FILE" -c Release -f net9.0-android -p:PublishAndroidPackage=true -p:AndroidPackageFormat=apk -p:AndroidKeyStore=false
+          dotnet publish "$PROJECT_FILE" -f net9.0-android -c Release \
+            -p:AndroidPackageFormat=apk \
+            -p:AndroidKeyStore=false \
+            -p:CreatePackage=true \
+            -p:OutputItemType=Apk
 
-      - name: 🔍 Collect Artifact
+      - name: 🔍 Debug & Collect
         run: |
           mkdir -p drop
+          # Procura qualquer arquivo .apk no servidor inteiro e move pro drop
           find . -name "*.apk" -type f -exec cp {} ./drop/ \;
-          echo "📂 Arquivos encontrados:"
+          echo "📂 Arquivos encontrados para download:"
           ls -R ./drop
 
       - name: 📤 Upload
         uses: actions/upload-artifact@v4
         with:
-          name: BlueNotes-App
+          name: BlueNotes-Install
           path: drop/
           if-no-files-found: error
           
