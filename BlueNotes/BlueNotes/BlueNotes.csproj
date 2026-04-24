@@ -1,6 +1,5 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFrameworks>net9.0-android</TargetFrameworks>
+<Project Sdk="Microsoft.Android.Sdk"> <PropertyGroup>
+    <TargetFramework>net9.0-android</TargetFramework>
     <OutputType>Exe</OutputType>
     <RootNamespace>BlueNotes</RootNamespace>
     <UseMaui>true</UseMaui>
@@ -18,7 +17,7 @@
     <AndroidPackageFormat>apk</AndroidPackageFormat>
     <AndroidGenerateAppBundle>false</AndroidGenerateAppBundle>
     <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
-
+    
     <AndroidUseAssemblyStore>false</AndroidUseAssemblyStore>
     <AndroidEnableAssemblyCompression>false</AndroidEnableAssemblyCompression>
     <RunAOTCompilation>false</RunAOTCompilation>
@@ -26,7 +25,9 @@
     <IncrementalPackaging>false</IncrementalPackaging>
 
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
-    <TargetSdkVersion>35</TargetSdkVersion> 
+    <TargetSdkVersion>35</TargetSdkVersion>
+    
+    <LanguageTargets Condition="'$(LanguageTargets)' == ''">$(MSBuildExtensionsPath)\Microsoft\Xamarin\Android\Xamarin.Android.CSharp.targets</LanguageTargets>
   </PropertyGroup>
 
   <ItemGroup>
