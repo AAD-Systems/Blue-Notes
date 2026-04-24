@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- ── Brand Blues ─────────────────────────────────────────── -->
+    <Color x:Key="Primary">#0D1B2A</Color>
+    <Color x:Key="PrimaryLight">#1B2A3B</Color>
+    <Color x:Key="Accent">#2E86C1</Color>
+    <Color x:Key="AccentDark">#1A5276</Color>
+    <Color x:Key="AccentLight">#5DADE2</Color>
+
+    <!-- ── Background Layers ────────────────────────────────────── -->
+    <Color x:Key="Background">#0A1628</Color>
+    <Color x:Key="Surface">#111F33</Color>
+    <Color x:Key="SurfaceElevated">#1A2B42</Color>
+    <Color x:Key="NavBackground">#0D1B2A</Color>
+    <Color x:Key="CardBackground">#1B2A3B</Color>
+
+    <!-- ── Text ─────────────────────────────────────────────────── -->
+    <Color x:Key="TextPrimary">#E8F4FD</Color>
+    <Color x:Key="TextSecondary">#A9CCE3</Color>
+    <Color x:Key="TextMuted">#5D8AA8</Color>
+    <Color x:Key="TextDisabled">#2E5073</Color>
+
+    <!-- ── Borders & Dividers ────────────────────────────────────── -->
+    <Color x:Key="Border">#1F3A54</Color>
+    <Color x:Key="DividerColor">#162D44</Color>
+
+    <!-- ── Status Colors ────────────────────────────────────────── -->
+    <Color x:Key="Success">#27AE60</Color>
+    <Color x:Key="Warning">#F39C12</Color>
+    <Color x:Key="Danger">#E74C3C</Color>
+    <Color x:Key="Info">#2E86C1</Color>
+
+    <!-- ── Note Card Colors ──────────────────────────────────────── -->
+    <Color x:Key="NoteBlue1">#1B2A3B</Color>
+    <Color x:Key="NoteBlue2">#0B4F6C</Color>
+    <Color x:Key="NoteBlue3">#154360</Color>
+    <Color x:Key="NoteBlue4">#1A5276</Color>
+    <Color x:Key="NoteBlue5">#2E4057</Color>
+    <Color x:Key="NoteBlue6">#2C3E50</Color>
+    <Color x:Key="NoteBlue7">#17202A</Color>
+    <Color x:Key="NoteBlue8">#212F3D</Color>
+
+    <!-- ── Overlay ───────────────────────────────────────────────── -->
+    <Color x:Key="Overlay">#80000000</Color>
+    <Color x:Key="PinColor">#F1C40F</Color>
+    <Color x:Key="LockColor">#E74C3C</Color>
+    <Color x:Key="ArchiveColor">#8E44AD</Color>
+</ResourceDictionary>

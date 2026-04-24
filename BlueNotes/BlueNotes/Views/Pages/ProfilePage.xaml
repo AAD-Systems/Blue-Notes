@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:BlueNotes.ViewModels"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:Class="BlueNotes.Views.Pages.ProfilePage"
+             x:DataType="vm:ProfileViewModel"
+             Title="Perfil">
+
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior EventName="Appearing" Command="{Binding LoadCommand}" />
+    </ContentPage.Behaviors>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="20">
+
+            <!-- Avatar -->
+            <Frame WidthRequest="90" HeightRequest="90" CornerRadius="45"
+                   BackgroundColor="{StaticResource Accent}" HasShadow="False"
+                   HorizontalOptions="Center" Padding="0">
+                <Label Text="BN" FontFamily="NunitoExtraBold" FontSize="32"
+                       TextColor="White" HorizontalOptions="Center" VerticalOptions="Center"/>
+            </Frame>
+
+            <Label Text="Blue Notes User" FontFamily="NunitoBold" FontSize="20"
+                   TextColor="{StaticResource TextPrimary}" HorizontalOptions="Center"/>
+            <Label Text="{Binding AppVersion, StringFormat='Versão {0}'}"
+                   Style="{StaticResource Caption}" HorizontalOptions="Center"/>
+
+            <!-- Stats -->
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12" Margin="0,8">
+                <Frame Grid.Column="0" Style="{StaticResource Card}" Padding="12">
+                    <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                        <Label Text="{Binding TotalNotes}" FontFamily="NunitoExtraBold"
+                               FontSize="28" TextColor="{StaticResource Accent}"
+                               HorizontalOptions="Center"/>
+                        <Label Text="Notas" Style="{StaticResource Caption}"
+                               HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </Frame>
+                <Frame Grid.Column="1" Style="{StaticResource Card}" Padding="12">
+                    <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                        <Label Text="{Binding TotalNotebooks}" FontFamily="NunitoExtraBold"
+                               FontSize="28" TextColor="{StaticResource Accent}"
+                               HorizontalOptions="Center"/>
+                        <Label Text="Cadernos" Style="{StaticResource Caption}"
+                               HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </Frame>
+                <Frame Grid.Column="2" Style="{StaticResource Card}" Padding="12">
+                    <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                        <Label Text="{Binding TotalTags}" FontFamily="NunitoExtraBold"
+                               FontSize="28" TextColor="{StaticResource Accent}"
+                               HorizontalOptions="Center"/>
+                        <Label Text="Tags" Style="{StaticResource Caption}"
+                               HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </Frame>
+            </Grid>
+
+            <!-- About -->
+            <Frame Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Sobre o App" FontFamily="NunitoBold" FontSize="16"
+                           TextColor="{StaticResource TextPrimary}"/>
+                    <BoxView Style="{StaticResource Divider}"/>
+                    <Label Style="{StaticResource Body}"
+                           Text="Blue Notes é um aplicativo de anotações minimalista com tema azul escuro. Suas notas ficam 100% salvas localmente no seu dispositivo, sem necessidade de conta ou internet."/>
+                    <Label Style="{StaticResource Caption}" Text="Desenvolvido com ❤️ e .NET MAUI"/>
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

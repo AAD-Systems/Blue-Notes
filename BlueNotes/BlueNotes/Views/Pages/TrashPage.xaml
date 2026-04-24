@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:BlueNotes.ViewModels"
+             xmlns:models="clr-namespace:BlueNotes.Models"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:Class="BlueNotes.Views.Pages.TrashPage"
+             x:DataType="vm:TrashViewModel"
+             Title="Lixeira">
+
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior EventName="Appearing" Command="{Binding LoadCommand}" />
+    </ContentPage.Behaviors>
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Esvaziar" Command="{Binding EmptyTrashCommand}" />
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="Auto,*">
+        <!-- Info Banner -->
+        <Frame Grid.Row="0" Margin="16,12,16,0" Padding="12"
+               BackgroundColor="{StaticResource SurfaceElevated}"
+               CornerRadius="10" HasShadow="False">
+            <Label Text="⚠️  Notas são excluídas permanentemente após 30 dias."
+                   FontSize="12" TextColor="{StaticResource TextMuted}"
+                   FontFamily="NunitoRegular"/>
+        </Frame>
+
+        <VerticalStackLayout Grid.Row="1" IsVisible="{Binding IsEmpty}"
+                             VerticalOptions="Center" Spacing="10">
+            <Label Text="🗑️" FontSize="60" HorizontalOptions="Center"/>
+            <Label Text="Lixeira vazia" Style="{StaticResource H2}" HorizontalOptions="Center"/>
+        </VerticalStackLayout>
+
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Items}" Margin="16" SelectionMode="None">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:Note">
+                    <SwipeView>
+                        <SwipeView.LeftItems>
+                            <SwipeItems>
+                                <SwipeItem Text="Restaurar" BackgroundColor="{StaticResource AccentDark}"
+                                           Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}},
+                                                             Path=BindingContext.RestoreCommand}"
+                                           CommandParameter="{Binding .}"/>
+                            </SwipeItems>
+                        </SwipeView.LeftItems>
+                        <SwipeView.RightItems>
+                            <SwipeItems>
+                                <SwipeItem Text="Excluir para sempre" BackgroundColor="{StaticResource Danger}"
+                                           Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}},
+                                                             Path=BindingContext.PermanentDeleteCommand}"
+                                           CommandParameter="{Binding .}"/>
+                            </SwipeItems>
+                        </SwipeView.RightItems>
+                        <Frame Style="{StaticResource Card}" Opacity="0.7">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <VerticalStackLayout Grid.Column="0">
+                                    <Label Text="{Binding Title}" FontFamily="NunitoBold" FontSize="15"
+                                           TextColor="{StaticResource TextPrimary}"/>
+                                    <Label Text="{Binding PreviewBody}" Style="{StaticResource Body}" MaxLines="1"/>
+                                </VerticalStackLayout>
+                                <Label Grid.Column="1" Text="{Binding DeletedAt, StringFormat='{0:dd/MM}'}"
+                                       Style="{StaticResource Caption}" VerticalOptions="Center"/>
+                            </Grid>
+                        </Frame>
+                    </SwipeView>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

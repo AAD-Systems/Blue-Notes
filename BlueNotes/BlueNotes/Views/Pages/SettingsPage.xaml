@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:BlueNotes.ViewModels"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:Class="BlueNotes.Views.Pages.SettingsPage"
+             x:DataType="vm:SettingsViewModel"
+             Title="Configurações">
+
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior EventName="Appearing" Command="{Binding LoadCommand}" />
+    </ContentPage.Behaviors>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="12">
+
+            <!-- Aparência -->
+            <Label Text="APARÊNCIA" Style="{StaticResource Caption}" Margin="4,8,0,4"/>
+            <Frame Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="16">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="Tema" FontFamily="NunitoSemiBold"
+                               FontSize="15" TextColor="{StaticResource TextPrimary}"
+                               VerticalOptions="Center"/>
+                        <Picker Grid.Column="1" SelectedItem="{Binding Theme}"
+                                TextColor="{StaticResource Accent}" FontFamily="NunitoRegular">
+                            <Picker.Items>
+                                <x:String>dark</x:String>
+                                <x:String>light</x:String>
+                                <x:String>system</x:String>
+                            </Picker.Items>
+                        </Picker>
+                    </Grid>
+                    <BoxView Style="{StaticResource Divider}"/>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="Idioma" FontFamily="NunitoSemiBold"
+                               FontSize="15" TextColor="{StaticResource TextPrimary}"
+                               VerticalOptions="Center"/>
+                        <Picker Grid.Column="1" SelectedItem="{Binding Language}"
+                                TextColor="{StaticResource Accent}">
+                            <Picker.Items>
+                                <x:String>pt-BR</x:String>
+                                <x:String>en</x:String>
+                            </Picker.Items>
+                        </Picker>
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Notas -->
+            <Label Text="NOTAS" Style="{StaticResource Caption}" Margin="4,8,0,4"/>
+            <Frame Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="16">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout Grid.Column="0">
+                            <Label Text="Salvar automaticamente" FontFamily="NunitoSemiBold"
+                                   FontSize="15" TextColor="{StaticResource TextPrimary}"/>
+                            <Label Text="Salva a cada 3 segundos" Style="{StaticResource Caption}"/>
+                        </VerticalStackLayout>
+                        <Switch Grid.Column="1" IsToggled="{Binding AutoSave}" VerticalOptions="Center"/>
+                    </Grid>
+                    <BoxView Style="{StaticResource Divider}"/>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="Ordenação padrão"
+                               FontFamily="NunitoSemiBold" FontSize="15"
+                               TextColor="{StaticResource TextPrimary}" VerticalOptions="Center"/>
+                        <Picker Grid.Column="1" SelectedItem="{Binding DefaultSort}"
+                                TextColor="{StaticResource Accent}">
+                            <Picker.Items>
+                                <x:String>date</x:String>
+                                <x:String>title</x:String>
+                                <x:String>color</x:String>
+                            </Picker.Items>
+                        </Picker>
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Segurança -->
+            <Label Text="SEGURANÇA" Style="{StaticResource Caption}" Margin="4,8,0,4"/>
+            <Frame Style="{StaticResource Card}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <VerticalStackLayout Grid.Column="0">
+                        <Label Text="Biometria / PIN" FontFamily="NunitoSemiBold"
+                               FontSize="15" TextColor="{StaticResource TextPrimary}"/>
+                        <Label Text="Desbloquear notas protegidas" Style="{StaticResource Caption}"/>
+                    </VerticalStackLayout>
+                    <Switch Grid.Column="1" IsToggled="{Binding Biometric}" VerticalOptions="Center"/>
+                </Grid>
+            </Frame>
+
+            <!-- Lixeira -->
+            <Label Text="LIXEIRA" Style="{StaticResource Caption}" Margin="4,8,0,4"/>
+            <Frame Style="{StaticResource Card}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0" Text="Excluir após (dias)"
+                           FontFamily="NunitoSemiBold" FontSize="15"
+                           TextColor="{StaticResource TextPrimary}" VerticalOptions="Center"/>
+                    <Stepper Grid.Column="1" Value="{Binding TrashDays}"
+                             Minimum="7" Maximum="90" Increment="7" />
+                </Grid>
+            </Frame>
+
+            <!-- Save Button -->
+            <Button Text="Salvar configurações" Style="{StaticResource PrimaryButton}"
+                    Command="{Binding SaveCommand}" Margin="0,8,0,0"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

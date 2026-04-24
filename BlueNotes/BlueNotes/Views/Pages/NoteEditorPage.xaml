@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:BlueNotes.ViewModels"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:Class="BlueNotes.Views.Pages.NoteEditorPage"
+             x:DataType="vm:NoteEditorViewModel"
+             NavigationPage.HasNavigationBar="False"
+             BackgroundColor="{Binding NoteColor}">
+
+    <Shell.BackButtonBehavior>
+        <BackButtonBehavior Command="{Binding GoBackCommand}" IsVisible="False" />
+    </Shell.BackButtonBehavior>
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+        <!-- ── Custom Nav Bar ────────────────────────────────────── -->
+        <Grid Grid.Row="0" Padding="12,48,12,8" ColumnDefinitions="Auto,*,Auto,Auto,Auto"
+              BackgroundColor="{Binding NoteColor}">
+            <!-- Back -->
+            <ImageButton Grid.Column="0" Source="icon_back.png"
+                         WidthRequest="40" HeightRequest="40"
+                         BackgroundColor="Transparent" Padding="8"
+                         Command="{Binding GoBackCommand}" />
+            <!-- Status -->
+            <Label Grid.Column="1" Text="{Binding LastSaved}"
+                   Style="{StaticResource Caption}"
+                   VerticalOptions="Center" HorizontalOptions="Center"/>
+            <!-- Lock -->
+            <ImageButton Grid.Column="2"
+                         Source="{Binding IsLocked, Converter={toolkit:BoolToObjectConverter TrueObject='icon_lock_closed.png', FalseObject='icon_lock_open.png'}}"
+                         WidthRequest="40" HeightRequest="40"
+                         BackgroundColor="Transparent" Padding="8"
+                         Command="{Binding ToggleLockCommand}" />
+            <!-- Export -->
+            <ImageButton Grid.Column="3" Source="icon_share.png"
+                         WidthRequest="40" HeightRequest="40"
+                         BackgroundColor="Transparent" Padding="8"
+                         Command="{Binding ExportTxtCommand}" />
+            <!-- Save -->
+            <Button Grid.Column="4" Text="Salvar"
+                    Style="{StaticResource GhostButton}"
+                    FontSize="13" Padding="12,6"
+                    Command="{Binding SaveCommand}" />
+        </Grid>
+
+        <!-- ── Format Toolbar ────────────────────────────────────── -->
+        <ScrollView Grid.Row="1" Orientation="Horizontal"
+                    HorizontalScrollBarVisibility="Never"
+                    Padding="12,0" HeightRequest="44">
+            <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                <!-- Font Size Selector -->
+                <Frame Style="{StaticResource TagChip}">
+                    <Label Text="A" FontFamily="NunitoBold" FontSize="14"
+                           TextColor="{StaticResource TextPrimary}">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnFontSizeTap" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                </Frame>
+                <!-- Color Picker -->
+                <Frame Style="{StaticResource TagChip}">
+                    <Label Text="🎨" FontSize="14">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnColorPickerTap" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                </Frame>
+                <!-- Export PDF -->
+                <Frame Style="{StaticResource TagChip}">
+                    <Label Text="PDF" FontFamily="NunitoBold" FontSize="12"
+                           TextColor="{StaticResource Accent}">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ExportPdfCommand}" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                </Frame>
+                <!-- Word Count -->
+                <Frame Style="{StaticResource TagChip}" BackgroundColor="Transparent"
+                       BorderColor="Transparent">
+                    <Label TextColor="{StaticResource TextMuted}" FontSize="12">
+                        <Label.Text>
+                            <MultiBinding StringFormat="{}{0} palavras · {1} chars">
+                                <Binding Path="WordCount" />
+                                <Binding Path="CharCount" />
+                            </MultiBinding>
+                        </Label.Text>
+                    </Label>
+                </Frame>
+            </HorizontalStackLayout>
+        </ScrollView>
+
+        <!-- ── Editor Body ───────────────────────────────────────── -->
+        <ScrollView Grid.Row="2">
+            <VerticalStackLayout Padding="20,8,20,20">
+                <!-- Title -->
+                <Entry Text="{Binding NoteTitle}"
+                       Placeholder="Título da nota..."
+                       FontFamily="NunitoExtraBold"
+                       FontSize="26"
+                       TextColor="{StaticResource TextPrimary}"
+                       PlaceholderColor="{StaticResource TextDisabled}"
+                       BackgroundColor="Transparent"
+                       ReturnType="Next" />
+
+                <BoxView Style="{StaticResource Divider}" Margin="0,4,0,12" />
+
+                <!-- Body -->
+                <Editor Text="{Binding NoteBody}"
+                        Placeholder="Escreva sua nota aqui..."
+                        FontFamily="NunitoRegular"
+                        FontSize="15"
+                        TextColor="{StaticResource TextPrimary}"
+                        PlaceholderColor="{StaticResource TextDisabled}"
+                        BackgroundColor="Transparent"
+                        AutoSize="TextChanges"
+                        MinimumHeightRequest="300" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- ── Tags Row ──────────────────────────────────────────── -->
+        <ScrollView Grid.Row="3" Orientation="Horizontal"
+                    HorizontalScrollBarVisibility="Never"
+                    Padding="16,8" HeightRequest="50"
+                    BackgroundColor="{StaticResource SurfaceElevated}">
+            <HorizontalStackLayout Spacing="6">
+                <Label Text="🏷" FontSize="16" VerticalOptions="Center"
+                       TextColor="{StaticResource TextMuted}"/>
+                <CollectionView ItemsSource="{Binding NoteTags}"
+                                SelectionMode="None">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Horizontal" ItemSpacing="6"/>
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame Style="{StaticResource TagChip}">
+                                <Label Text="{Binding Name}" FontSize="12"
+                                       TextColor="{StaticResource TextPrimary}"/>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </HorizontalStackLayout>
+        </ScrollView>
+
+    </Grid>
+</ContentPage>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       xmlns:pages="clr-namespace:BlueNotes.Views.Pages"
+       x:Class="BlueNotes.AppShell"
+       Shell.FlyoutBehavior="Flyout"
+       Shell.FlyoutWidth="280"
+       FlyoutBackgroundColor="{StaticResource NavBackground}"
+       Title="Blue Notes">
+
+    <!-- ── Flyout Header ─────────────────────────────────── -->
+    <Shell.FlyoutHeader>
+        <Grid HeightRequest="120" BackgroundColor="{StaticResource Primary}" Padding="20,30,20,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="52" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Frame Grid.Column="0" CornerRadius="14" Padding="0"
+                   BackgroundColor="{StaticResource Accent}" WidthRequest="48" HeightRequest="48"
+                   VerticalOptions="Center" HasShadow="False">
+                <Label Text="BN" FontFamily="NunitoExtraBold" FontSize="17"
+                       TextColor="White" HorizontalOptions="Center" VerticalOptions="Center"/>
+            </Frame>
+            <VerticalStackLayout Grid.Column="1" Spacing="2" Margin="12,0,0,0" VerticalOptions="Center">
+                <Label Text="Blue Notes" FontFamily="NunitoExtraBold" FontSize="20"
+                       TextColor="White" />
+                <Label Text="v0.0.0.0.1" FontFamily="NunitoRegular" FontSize="12"
+                       TextColor="{StaticResource TextMuted}" />
+            </VerticalStackLayout>
+        </Grid>
+    </Shell.FlyoutHeader>
+
+    <!-- ── Main Tabs ──────────────────────────────────────── -->
+    <FlyoutItem Title="Início" Icon="icon_home.png" Route="home">
+        <ShellContent ContentTemplate="{DataTemplate pages:HomePage}" Route="HomePage" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Cadernos" Icon="icon_notebook.png">
+        <ShellContent ContentTemplate="{DataTemplate pages:NotebooksPage}" Route="NotebooksPage" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Etiquetas" Icon="icon_tag.png">
+        <ShellContent ContentTemplate="{DataTemplate pages:TagsPage}" Route="TagsPage" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Busca" Icon="icon_search.png">
+        <ShellContent ContentTemplate="{DataTemplate pages:SearchPage}" Route="SearchPage" />
+    </FlyoutItem>
+
+    <!-- ── Separator ──────────────────────────────────────── -->
+    <FlyoutItem Title="Arquivo" Icon="icon_archive.png">
+        <ShellContent ContentTemplate="{DataTemplate pages:ArchivePage}" Route="ArchivePage" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Lixeira" Icon="icon_trash.png">
+        <ShellContent ContentTemplate="{DataTemplate pages:TrashPage}" Route="TrashPage" />
+    </FlyoutItem>
+
+    <!-- ── Bottom Section ─────────────────────────────────── -->
+    <FlyoutItem Title="Configurações" Icon="icon_settings.png">
+        <ShellContent ContentTemplate="{DataTemplate pages:SettingsPage}" Route="SettingsPage" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Perfil" Icon="icon_profile.png">
+        <ShellContent ContentTemplate="{DataTemplate pages:ProfilePage}" Route="ProfilePage" />
+    </FlyoutItem>
+
+    <!-- ── Flyout Footer ─────────────────────────────────── -->
+    <Shell.FlyoutFooter>
+        <Label Text="© 2025 Blue Notes" FontSize="11" TextColor="{StaticResource TextMuted}"
+               FontFamily="NunitoRegular" HorizontalOptions="Center" Margin="0,8,0,16"/>
+    </Shell.FlyoutFooter>
+
+    <!-- ── Shell Item Styles ─────────────────────────────── -->
+    <Shell.Resources>
+        <Style TargetType="FlyoutItem">
+            <Setter Property="Shell.FlyoutItemIsVisible" Value="True"/>
+        </Style>
+    </Shell.Resources>
+</Shell>

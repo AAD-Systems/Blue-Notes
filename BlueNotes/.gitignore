@@ -1,0 +1,40 @@
+## .NET MAUI / Xamarin
+*.user
+*.suo
+.vs/
+bin/
+obj/
+*.userprefs
+*.usertasks
+*.pidb
+*.sln.cache
+*.DS_Store
+Thumbs.db
+
+## Android
+*.apk
+*.aab
+*.ap_
+*.dex
+local.properties
+.gradle/
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+*.keystore
+!debug.keystore
+
+## NuGet
+packages/
+*.nupkg
+.nuget/
+
+## Rider / VS Code
+.idea/
+.vscode/
+*.DotSettings.user
+
+## Logs
+*.log
+crash-*.txt

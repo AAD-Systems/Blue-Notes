@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- ── Page Base ────────────────────────────────────────────── -->
+    <Style TargetType="ContentPage" ApplyToDerivedTypes="True">
+        <Setter Property="BackgroundColor" Value="{StaticResource Background}" />
+    </Style>
+
+    <!-- ── Navigation Bar ───────────────────────────────────────── -->
+    <Style TargetType="NavigationPage">
+        <Setter Property="BarBackgroundColor"   Value="{StaticResource Primary}" />
+        <Setter Property="BarTextColor"         Value="{StaticResource TextPrimary}" />
+    </Style>
+
+    <!-- ── Shell ────────────────────────────────────────────────── -->
+    <Style TargetType="Shell" ApplyToDerivedTypes="True">
+        <Setter Property="Shell.BackgroundColor"          Value="{StaticResource Primary}" />
+        <Setter Property="Shell.ForegroundColor"          Value="{StaticResource TextPrimary}" />
+        <Setter Property="Shell.TitleColor"               Value="{StaticResource TextPrimary}" />
+        <Setter Property="Shell.DisabledColor"            Value="{StaticResource TextDisabled}" />
+        <Setter Property="Shell.UnselectedColor"          Value="{StaticResource TextMuted}" />
+        <Setter Property="Shell.NavBarHasShadow"          Value="False" />
+        <Setter Property="Shell.TabBarBackgroundColor"    Value="{StaticResource Primary}" />
+        <Setter Property="Shell.TabBarForegroundColor"    Value="{StaticResource Accent}" />
+        <Setter Property="Shell.TabBarUnselectedColor"    Value="{StaticResource TextMuted}" />
+    </Style>
+
+    <!-- ── Labels ───────────────────────────────────────────────── -->
+    <Style TargetType="Label" x:Key="H1">
+        <Setter Property="FontFamily"   Value="NunitoExtraBold" />
+        <Setter Property="FontSize"     Value="28" />
+        <Setter Property="TextColor"    Value="{StaticResource TextPrimary}" />
+    </Style>
+
+    <Style TargetType="Label" x:Key="H2">
+        <Setter Property="FontFamily"   Value="NunitoBold" />
+        <Setter Property="FontSize"     Value="20" />
+        <Setter Property="TextColor"    Value="{StaticResource TextPrimary}" />
+    </Style>
+
+    <Style TargetType="Label" x:Key="Body">
+        <Setter Property="FontFamily"   Value="NunitoRegular" />
+        <Setter Property="FontSize"     Value="14" />
+        <Setter Property="TextColor"    Value="{StaticResource TextSecondary}" />
+        <Setter Property="LineHeight"   Value="1.5" />
+    </Style>
+
+    <Style TargetType="Label" x:Key="Caption">
+        <Setter Property="FontFamily"   Value="NunitoRegular" />
+        <Setter Property="FontSize"     Value="11" />
+        <Setter Property="TextColor"    Value="{StaticResource TextMuted}" />
+    </Style>
+
+    <!-- ── Default Label ────────────────────────────────────────── -->
+    <Style TargetType="Label">
+        <Setter Property="FontFamily"   Value="NunitoRegular" />
+        <Setter Property="TextColor"    Value="{StaticResource TextPrimary}" />
+    </Style>
+
+    <!-- ── Buttons ──────────────────────────────────────────────── -->
+    <Style TargetType="Button" x:Key="PrimaryButton">
+        <Setter Property="BackgroundColor"  Value="{StaticResource Accent}" />
+        <Setter Property="TextColor"        Value="White" />
+        <Setter Property="FontFamily"       Value="NunitoBold" />
+        <Setter Property="FontSize"         Value="15" />
+        <Setter Property="CornerRadius"     Value="14" />
+        <Setter Property="Padding"          Value="24,12" />
+        <Setter Property="HeightRequest"    Value="50" />
+    </Style>
+
+    <Style TargetType="Button" x:Key="GhostButton">
+        <Setter Property="BackgroundColor"  Value="Transparent" />
+        <Setter Property="TextColor"        Value="{StaticResource Accent}" />
+        <Setter Property="FontFamily"       Value="NunitoSemiBold" />
+        <Setter Property="FontSize"         Value="14" />
+        <Setter Property="CornerRadius"     Value="10" />
+        <Setter Property="BorderColor"      Value="{StaticResource Accent}" />
+        <Setter Property="BorderWidth"      Value="1.5" />
+        <Setter Property="Padding"          Value="20,10" />
+    </Style>
+
+    <Style TargetType="Button" x:Key="DangerButton">
+        <Setter Property="BackgroundColor"  Value="{StaticResource Danger}" />
+        <Setter Property="TextColor"        Value="White" />
+        <Setter Property="FontFamily"       Value="NunitoBold" />
+        <Setter Property="CornerRadius"     Value="14" />
+        <Setter Property="Padding"          Value="20,10" />
+    </Style>
+
+    <!-- ── FAB ──────────────────────────────────────────────────── -->
+    <Style TargetType="Button" x:Key="FAB">
+        <Setter Property="BackgroundColor"  Value="{StaticResource Accent}" />
+        <Setter Property="TextColor"        Value="White" />
+        <Setter Property="FontSize"         Value="28" />
+        <Setter Property="CornerRadius"     Value="28" />
+        <Setter Property="WidthRequest"     Value="56" />
+        <Setter Property="HeightRequest"    Value="56" />
+        <Setter Property="Padding"          Value="0" />
+        <Setter Property="Shadow">
+            <Setter.Value>
+                <Shadow Brush="{StaticResource Accent}" Offset="0,4" Radius="12" Opacity="0.4" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ── Card Frame ───────────────────────────────────────────── -->
+    <Style TargetType="Frame" x:Key="Card">
+        <Setter Property="BackgroundColor"  Value="{StaticResource CardBackground}" />
+        <Setter Property="CornerRadius"     Value="16" />
+        <Setter Property="HasShadow"        Value="False" />
+        <Setter Property="Padding"          Value="16" />
+        <Setter Property="Margin"           Value="0,0,0,10" />
+        <Setter Property="BorderColor"      Value="{StaticResource Border}" />
+    </Style>
+
+    <!-- ── Entry / Editor ───────────────────────────────────────── -->
+    <Style TargetType="Entry">
+        <Setter Property="TextColor"        Value="{StaticResource TextPrimary}" />
+        <Setter Property="PlaceholderColor" Value="{StaticResource TextMuted}" />
+        <Setter Property="BackgroundColor"  Value="Transparent" />
+        <Setter Property="FontFamily"       Value="NunitoRegular" />
+    </Style>
+
+    <Style TargetType="Editor">
+        <Setter Property="TextColor"        Value="{StaticResource TextPrimary}" />
+        <Setter Property="PlaceholderColor" Value="{StaticResource TextMuted}" />
+        <Setter Property="BackgroundColor"  Value="Transparent" />
+        <Setter Property="FontFamily"       Value="NunitoRegular" />
+    </Style>
+
+    <!-- ── SearchBar ────────────────────────────────────────────── -->
+    <Style TargetType="SearchBar">
+        <Setter Property="TextColor"        Value="{StaticResource TextPrimary}" />
+        <Setter Property="PlaceholderColor" Value="{StaticResource TextMuted}" />
+        <Setter Property="BackgroundColor"  Value="{StaticResource SurfaceElevated}" />
+        <Setter Property="FontFamily"       Value="NunitoRegular" />
+        <Setter Property="CancelButtonColor" Value="{StaticResource Accent}" />
+    </Style>
+
+    <!-- ── Switch ────────────────────────────────────────────────── -->
+    <Style TargetType="Switch">
+        <Setter Property="OnColor"      Value="{StaticResource Accent}" />
+        <Setter Property="ThumbColor"   Value="White" />
+    </Style>
+
+    <!-- ── ActivityIndicator ─────────────────────────────────────── -->
+    <Style TargetType="ActivityIndicator">
+        <Setter Property="Color" Value="{StaticResource Accent}" />
+    </Style>
+
+    <!-- ── Separator ─────────────────────────────────────────────── -->
+    <Style TargetType="BoxView" x:Key="Divider">
+        <Setter Property="BackgroundColor"  Value="{StaticResource DividerColor}" />
+        <Setter Property="HeightRequest"    Value="1" />
+        <Setter Property="Margin"           Value="0,8" />
+    </Style>
+
+    <!-- ── Tag Chip ──────────────────────────────────────────────── -->
+    <Style TargetType="Frame" x:Key="TagChip">
+        <Setter Property="CornerRadius"     Value="20" />
+        <Setter Property="Padding"          Value="10,4" />
+        <Setter Property="HasShadow"        Value="False" />
+        <Setter Property="BackgroundColor"  Value="{StaticResource AccentDark}" />
+        <Setter Property="BorderColor"      Value="{StaticResource Accent}" />
+        <Setter Property="Margin"           Value="0,0,6,0" />
+    </Style>
+
+    <!-- ── RefreshView ───────────────────────────────────────────── -->
+    <Style TargetType="RefreshView">
+        <Setter Property="RefreshColor" Value="{StaticResource Accent}" />
+    </Style>
+</ResourceDictionary>

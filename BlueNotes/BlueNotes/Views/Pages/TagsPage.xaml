@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:BlueNotes.ViewModels"
+             xmlns:models="clr-namespace:BlueNotes.Models"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:Class="BlueNotes.Views.Pages.TagsPage"
+             x:DataType="vm:TagsViewModel"
+             Title="Etiquetas">
+
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior EventName="Appearing" Command="{Binding LoadCommand}" />
+    </ContentPage.Behaviors>
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="+" Command="{Binding AddTagCommand}" />
+    </ContentPage.ToolbarItems>
+
+    <Grid>
+        <VerticalStackLayout IsVisible="{Binding IsEmpty}" VerticalOptions="Center" Spacing="10">
+            <Label Text="🏷️" FontSize="60" HorizontalOptions="Center"/>
+            <Label Text="Nenhuma etiqueta" Style="{StaticResource H2}" HorizontalOptions="Center"/>
+        </VerticalStackLayout>
+
+        <CollectionView ItemsSource="{Binding Items}" Margin="16" SelectionMode="None">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:Tag">
+                    <SwipeView>
+                        <SwipeView.RightItems>
+                            <SwipeItems>
+                                <SwipeItem Text="Excluir" BackgroundColor="{StaticResource Danger}"
+                                           Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}},
+                                                             Path=BindingContext.DeleteTagCommand}"
+                                           CommandParameter="{Binding .}"/>
+                            </SwipeItems>
+                        </SwipeView.RightItems>
+                        <Frame Style="{StaticResource Card}">
+                            <Grid ColumnDefinitions="Auto,*,Auto">
+                                <Frame Grid.Column="0" WidthRequest="12" HeightRequest="12"
+                                       CornerRadius="6" BackgroundColor="{Binding Color}"
+                                       HasShadow="False" Padding="0" VerticalOptions="Center"/>
+                                <Label Grid.Column="1" Text="{Binding Name}"
+                                       FontFamily="NunitoSemiBold" FontSize="15"
+                                       TextColor="{StaticResource TextPrimary}" Margin="12,0,0,0"
+                                       VerticalOptions="Center"/>
+                                <Label Grid.Column="2"
+                                       Text="{Binding UsageCount, StringFormat='{0} notas'}"
+                                       Style="{StaticResource Caption}" VerticalOptions="Center"/>
+                            </Grid>
+                        </Frame>
+                    </SwipeView>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>
