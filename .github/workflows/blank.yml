@@ -10,35 +10,49 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      
       - name: SDK_Fix
         run: echo '{"sdk":{"version":"8.0.400","rollForward":"latestFeature"}}' > global.json
+        
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
+          
       - uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
+          
       - name: Props_Fix
         run: |
           PROJECT_DIR=$(find . -name "*.csproj" -exec dirname {} \;)
           for dir in $PROJECT_DIR; do
             echo "<Project><PropertyGroup><CheckEolTargetFramework>false</CheckEolTargetFramework><SupportedOSPlatformVersion>24.0</SupportedOSPlatformVersion></PropertyGroup></Project>" > "$dir/Directory.Build.props"
           done
+          
       - name: Workload_Restore
         run: |
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
           dotnet workload restore "$PROJECT_FILE"
+          # O restore original voltou!
           dotnet restore "$PROJECT_FILE" -p:CheckEolTargetFramework=false
+          
       - name: Build_APK
         run: |
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
-          # Adicionamos a saída explícita para uma pasta chamada 'output'
-          dotnet publish "$PROJECT_FILE" -c Release -f net8.0-android -p:CheckEolTargetFramework=false -p:AndroidPackageFormat=apk -p:AndroidKeyStore=false -o ./output
-      - name: Upload
+          # O formato APK voltou!
+          dotnet publish "$PROJECT_FILE" -c Release -f net8.0-android -p:CheckEolTargetFramework=false -p:AndroidPackageFormat=apk -p:AndroidKeyStore=false
+          
+      - name: 🔍 Find APK and Collect
+        run: |
+          echo "📂 Listando todos os APKs gerados:"
+          find . -name "*.apk"
+          mkdir -p drop
+          find . -name "*.apk" -exec cp {} ./drop/ \;
+          
+      - name: 📤 Upload
         uses: actions/upload-artifact@v4
         with:
           name: BlueNotes-APK
-          # Agora ele vai direto na pasta que mandamos criar
-          path: ./output/**/*.apk
+          path: drop/
           
