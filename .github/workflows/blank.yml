@@ -23,31 +23,36 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      # ESSE PASSO RESOLVE O ERRO XA1036:
+      - name: Version_Match_Fix
+        run: |
+          PROJECT_DIR=$(find . -name "*.csproj" -exec dirname {} \;)
+          for dir in $PROJECT_DIR; do
+            echo "<Project><PropertyGroup><CheckEolTargetFramework>false</CheckEolTargetFramework><SupportedOSPlatformVersion>24.0</SupportedOSPlatformVersion></PropertyGroup></Project>" > "$dir/Directory.Build.props"
+          done
+
       - name: Workload_Restore
         run: |
           dotnet workload install maui-android
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
           dotnet restore "$PROJECT_FILE" -p:CheckEolTargetFramework=false
 
-      - name: 🔨 Build & Force Packaging
+      - name: 🔨 Build & Force APK
         run: |
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
-          # Usamos dotnet publish com flags de arquivamento forçado
+          # Adicionamos a flag de versão diretamente no comando também
           dotnet publish "$PROJECT_FILE" -f net8.0-android -c Release \
             -p:CheckEolTargetFramework=false \
+            -p:SupportedOSPlatformVersion=24.0 \
             -p:AndroidPackageFormat=apk \
             -p:AndroidKeyStore=false \
-            -p:CreatePackagePerAbi=false \
             -p:EmbedAssembliesIntoApk=true
 
-      - name: 🔍 Capture Everything
+      - name: 🔍 Find and Collect
         run: |
           mkdir -p drop
-          echo "🔎 Procurando QUALQUER instalador..."
-          # O segredo: buscar no servidor inteiro por .apk ou .aab
           find . -name "*.apk" -exec cp {} ./drop/ \;
           find . -name "*.aab" -exec cp {} ./drop/ \;
-          echo "Conteúdo final da pasta de upload:"
           ls -R ./drop
 
       - name: 📤 Upload
