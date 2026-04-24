@@ -8,14 +8,10 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # MUDANÇA CRUCIAL: Saindo do ubuntu-latest para o 22.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-
-      - name: 🛠️ Force SDK Version
-        run: |
-          # Isso obriga o runner a usar ferramentas do .NET 8, ignorando o suporte do .NET 10
-          echo '{"sdk":{"version":"8.0.400","rollForward":"latestFeature"}}' > global.json
 
       - name: 🛠️ Setup .NET
         uses: actions/setup-dotnet@v4
@@ -28,36 +24,33 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 📦 Workload & Silent Restore
-        # O "|| true" no final do restore obriga o GitHub a continuar mesmo com o erro de suporte
+      - name: 📦 Workload & Restore
         run: |
           dotnet workload install maui-android
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
-          dotnet restore "$PROJECT_FILE" -p:CheckEolTargetFramework=false || true
+          dotnet restore "$PROJECT_FILE" -p:CheckEolTargetFramework=false
 
-      - name: 🔨 Build APK (Ignore Exit Codes)
+      - name: 🔨 Build APK (The Last Stand)
         run: |
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
-          echo "🚀 Tentando buildar: $PROJECT_FILE"
-          
-          # Tentamos o build. Se ele gerar o arquivo, o exit code não importa agora.
-          dotnet build "$PROJECT_FILE" -c Release -f net8.0-android /t:Publish \
+          # Usamos o publish porque ele é mais completo para gerar o binário final
+          dotnet publish "$PROJECT_FILE" -f net8.0-android -c Release \
             -p:AndroidPackageFormat=apk \
             -p:AndroidKeyStore=false \
-            -p:CheckEolTargetFramework=false || true
+            -p:CheckEolTargetFramework=false \
+            -p:SupportedOSPlatformVersion=24.0
 
       - name: 🔍 Collect Artifact
         run: |
           mkdir -p drop
-          # Procura qualquer coisa que tenha cara de APK
+          # Busca profunda por APKs
           find . -name "*.apk" -exec cp {} ./drop/ \;
-          echo "📂 Arquivos encontrados (se a lista abaixo estiver vazia, o build falhou silenciosamente):"
+          echo "📂 Arquivos encontrados:"
           ls -R ./drop
 
       - name: 📤 Upload
         uses: actions/upload-artifact@v4
         with:
-          name: BlueNotes-APK
+          name: BlueNotes-APK-U22
           path: drop/
-          if-no-files-found: error
           
