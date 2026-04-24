@@ -1,0 +1,57 @@
+name: BlueNotesBuild
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+env:
+  DOTNET_VERSION: '9.0.x'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🛠️ Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: ☕ Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: 📦 Install Workloads & Restore
+        run: |
+          # Instalando workloads e aceitando as licenças do Android automaticamente
+          dotnet workload install maui-android --accept-license-agreements
+          PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
+          dotnet restore "$PROJECT_FILE"
+
+      - name: 🔨 Build APK
+        run: |
+          PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
+          # O segredo pro .NET 9: PublishAndroidPackage + aceitar licenças
+          dotnet publish "$PROJECT_FILE" -f net9.0-android -c Release \
+            -p:AndroidPackageFormat=apk \
+            -p:AndroidKeyStore=false \
+            -p:PublishAndroidPackage=true \
+            -p:EmbedAssembliesIntoApk=true
+
+      - name: 🔍 Collect Artifact
+        run: |
+          mkdir -p drop
+          # Procura o APK em qualquer lugar (o .NET 9 adora esconder ele em subpastas)
+          find . -name "*.apk" -type f -exec cp {} ./drop/ \;
+          echo "📂 Arquivos capturados para upload:"
+          ls -R ./drop
+
+      - name: 📤 Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: BlueNotes-APK-Net9
+          path: drop/
+          if-no-files-found: error
+          
