@@ -7,6 +7,9 @@ on:
 
 env:
   DOTNET_VERSION: '8.0.x'
+  # Esta variável silencia o erro de fim de suporte em nível global no Runner
+  DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK: true
+  CheckEolTargetFramework: false
 
 jobs:
   build-android:
@@ -29,7 +32,7 @@ jobs:
           distribution: 'temurin'
 
       - name: 📲 Install MAUI Android workload
-        run: dotnet workload install maui-android
+        run: dotnet workload install maui-android --ignore-failed-sources
 
       - name: 📦 Restore & Build APK
         run: |
@@ -42,10 +45,9 @@ jobs:
           
           echo "🚀 Projeto encontrado: $PROJECT_FILE"
           
-          # Restaurar com a flag para ignorar erro de fim de suporte
+          # Restore e Publish ignorando explicitamente o erro NETSDK1202
           dotnet restore "$PROJECT_FILE" -p:CheckEolTargetFramework=false
           
-          # Build com a flag para ignorar erro de fim de suporte
           dotnet publish "$PROJECT_FILE" \
             -f net8.0-android \
             -c Release \
