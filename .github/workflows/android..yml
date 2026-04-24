@@ -15,35 +15,34 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
-      - name: 🛡️ Fix SDK Environment
+      - name: 🛡️ Force SDK Registration
         shell: pwsh
         run: |
-          # Cria um global.json para impedir que o runner use versões instáveis (v10)
-          '{"sdk": {"version": "9.0.100", "rollForward": "latestFeature"}}' | Out-File global.json
+          # 1. Garante que o workload seja instalado E registrado no caminho do usuário
+          dotnet workload install maui-android android --include-pre-release
           
-          # Instalação forçada com update
-          dotnet workload install maui-android --source https://api.nuget.org/v3/index.json
-          dotnet workload update
+          # 2. Força o .NET a reconstruir o índice de SDKs
+          dotnet nuget locals all --clear
 
-      - name: 🔨 Build & Publish APK
+      - name: 🔨 Build APK (Context Injection)
         shell: pwsh
         run: |
           $projFile = Get-ChildItem -Filter *.csproj -Recurse | Select-Object -First 1 -ExpandProperty FullName
           
-          # O segredo: usamos 'dotnet build' com o target de publish para ignorar erros de resolução de SDK do publish direto
-          dotnet build "$projFile" -f net9.0-android -c Release `
+          # Em vez de dotnet publish, usamos o MSBuild direto via 'dotnet build' 
+          # com parâmetros que forçam a resolução do SDK do Android
+          dotnet build "$projFile" -c Release -f net9.0-android `
             -p:AndroidPackageFormat=apk `
             -p:AndroidKeyStore=false `
-            -p:CreatePackage=true `
-            -p:DeployOnBuild=true `
-            -p:PublishAndroidPackage=true
+            -p:PublishAndroidPackage=true `
+            -p:EmbedAssembliesIntoApk=true `
+            --no-restore 
 
-      - name: 📤 Upload APK
+      - name: 📤 Upload
         uses: actions/upload-artifact@v4
         with:
           name: BlueNotes-APK-Final
           path: |
-            **/bin/Release/net9.0-android/*-Signed.apk
             **/bin/Release/net9.0-android/*.apk
           if-no-files-found: error
           
