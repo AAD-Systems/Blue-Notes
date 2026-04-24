@@ -10,41 +10,45 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: SDK_Fix
         run: echo '{"sdk":{"version":"8.0.400","rollForward":"latestFeature"}}' > global.json
+
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
+
       - uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Props_Fix
-        run: |
-          PROJECT_DIR=$(find . -name "*.csproj" -exec dirname {} \;)
-          for dir in $PROJECT_DIR; do
-            echo "<Project><PropertyGroup><CheckEolTargetFramework>false</CheckEolTargetFramework><SupportedOSPlatformVersion>24.0</SupportedOSPlatformVersion></PropertyGroup></Project>" > "$dir/Directory.Build.props"
-          done
+
       - name: Workload_Restore
         run: |
+          dotnet workload install maui-android
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
-          dotnet workload restore "$PROJECT_FILE"
-      
-      - name: 🔨 Build & Force APK
+          dotnet restore "$PROJECT_FILE" -p:CheckEolTargetFramework=false
+
+      - name: 🔨 Build & Force Packaging
         run: |
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
-          # O segredo: usamos 'build' com '/t:Publish' e forçamos o formato APK
-          dotnet build "$PROJECT_FILE" -c Release -f net8.0-android /t:Publish -p:AndroidPackageFormat=apk -p:AndroidKeyStore=false -p:CheckEolTargetFramework=false
+          # Usamos dotnet publish com flags de arquivamento forçado
+          dotnet publish "$PROJECT_FILE" -f net8.0-android -c Release \
+            -p:CheckEolTargetFramework=false \
+            -p:AndroidPackageFormat=apk \
+            -p:AndroidKeyStore=false \
+            -p:CreatePackagePerAbi=false \
+            -p:EmbedAssembliesIntoApk=true
 
-      - name: 🔍 Debug & Collect
+      - name: 🔍 Capture Everything
         run: |
           mkdir -p drop
-          echo "🔎 Procurando arquivos na pasta bin..."
-          # Lista recursivamente tudo que foi gerado para o log
-          find . -path "*/bin/Release/*" -type f
-          # Copia qualquer APK ou AAB que encontrar
+          echo "🔎 Procurando QUALQUER instalador..."
+          # O segredo: buscar no servidor inteiro por .apk ou .aab
           find . -name "*.apk" -exec cp {} ./drop/ \;
           find . -name "*.aab" -exec cp {} ./drop/ \;
+          echo "Conteúdo final da pasta de upload:"
+          ls -R ./drop
 
       - name: 📤 Upload
         uses: actions/upload-artifact@v4
