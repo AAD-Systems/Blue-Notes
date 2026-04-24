@@ -16,18 +16,23 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: 📦 Install MAUI Workload
-        run: dotnet workload install maui-android
+        run: |
+          dotnet workload install maui-android --source https://api.nuget.org/v3/index.json
+          dotnet workload install android --source https://api.nuget.org/v3/index.json
 
       - name: 🔨 Build & Publish APK
         shell: pwsh
         run: |
-          # Procura o arquivo csproj recursivamente
+          # Localiza o arquivo
           $projFile = Get-ChildItem -Filter *.csproj -Recurse | Select-Object -First 1 -ExpandProperty FullName
-          Write-Host "Compilando: $projFile"
           
-          # Roda o comando usando a variável do caminho
-          dotnet publish "$projFile" -f net9.0-android -c Release -p:AndroidPackageFormat=apk -p:AndroidKeyStore=false -p:PublishAndroidPackage=true
-
+          # FORÇA O USO DO SDK E PUBLICA
+          dotnet publish "$projFile" -f net9.0-android -c Release `
+            -p:AndroidPackageFormat=apk `
+            -p:AndroidKeyStore=false `
+            -p:PublishAndroidPackage=true `
+            --self-contained
+            
       - name: 📤 Upload APK
         uses: actions/upload-artifact@v4
         with:
