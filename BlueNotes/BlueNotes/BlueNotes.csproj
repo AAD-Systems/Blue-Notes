@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net9.0-android</TargetFrameworks>
+    <OutputType>Exe</OutputType>
     <RootNamespace>BlueNotes</RootNamespace>
     <UseMaui>true</UseMaui>
     <SingleProject>true</SingleProject>
@@ -11,15 +12,19 @@
     <ApplicationVersion>1</ApplicationVersion>
     <AssemblyName>BlueNotes</AssemblyName>
 
+    <PublishAndroidPackage>true</PublishAndroidPackage>
     <AndroidPackageFormat>apk</AndroidPackageFormat>
     <AndroidGenerateAppBundle>false</AndroidGenerateAppBundle>
-    <PublishAndroidPackage>true</PublishAndroidPackage>
     <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+    
     <AndroidUseAssemblyStore>false</AndroidUseAssemblyStore>
     <AndroidEnableAssemblyCompression>false</AndroidEnableAssemblyCompression>
+    <RunAOTCompilation>false</RunAOTCompilation>
+    <AndroidLinkMode>None</AndroidLinkMode> 
+    <IncrementalPackaging>false</IncrementalPackaging>
 
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
-  </PropertyGroup>
+    <TargetSdkVersion>35</TargetSdkVersion> </PropertyGroup>
 
   <ItemGroup>
     <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#0D1B2A" />
