@@ -36,7 +36,6 @@ jobs:
         run: |
           PROJECT_DIR=$(find . -name "*.csproj" -exec dirname {} \;)
           for dir in $PROJECT_DIR; do
-            # Usando uma string sem aspas internas para evitar erro de parse no Bash
             echo "<Project>
               <PropertyGroup>
                 <CheckEolTargetFramework>false</CheckEolTargetFramework>
