@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: SDK_Fix
+      - name: 🛠️ Setup
         run: echo '{"sdk":{"version":"8.0.400","rollForward":"latestFeature"}}' > global.json
 
       - uses: actions/setup-dotnet@v4
@@ -23,43 +23,41 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Version_Match_Fix
+      - name: 🔧 Version Fix
         run: |
           PROJECT_DIR=$(find . -name "*.csproj" -exec dirname {} \;)
           for dir in $PROJECT_DIR; do
             echo "<Project><PropertyGroup><CheckEolTargetFramework>false</CheckEolTargetFramework><SupportedOSPlatformVersion>24.0</SupportedOSPlatformVersion></PropertyGroup></Project>" > "$dir/Directory.Build.props"
           done
 
-      - name: Workload_Restore
+      - name: 📦 Workload & Restore
         run: |
           dotnet workload install maui-android
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
           dotnet restore "$PROJECT_FILE" -p:CheckEolTargetFramework=false
 
-      - name: 🔨 Build & Force APK
+      - name: 🔨 Force APK Generation
         run: |
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
-          # ADICIONAMOS O -r android-arm64 PARA FORÇAR O EMPACOTAMENTO
-          dotnet publish "$PROJECT_FILE" -f net8.0-android -c Release \
-            -r android-arm64 \
-            -p:CheckEolTargetFramework=false \
-            -p:SupportedOSPlatformVersion=24.0 \
+          # O segredo é o Target 'SignAndroidPackage' - ele força a criação do APK mesmo sem KeyStore (ele gera um temporário)
+          dotnet build "$PROJECT_FILE" -c Release -f net8.0-android \
+            -t:SignAndroidPackage \
             -p:AndroidPackageFormat=apk \
             -p:AndroidKeyStore=false \
-            -p:EmbedAssembliesIntoApk=true \
-            --self-contained
+            -p:CheckEolTargetFramework=false
 
-      - name: 🔍 Find and Collect
+      - name: 🔍 Capture APK
         run: |
           mkdir -p drop
-          echo "📂 Buscando arquivos..."
-          # O find agora busca por tudo, inclusive arquivos sem assinatura
+          echo "🔎 Vasculhando o servidor..."
+          # Procura em tudo, inclusive pastas ocultas
           find . -name "*.apk" -exec cp {} ./drop/ \;
+          echo "Arquivos encontrados:"
           ls -R ./drop
 
       - name: 📤 Upload
         uses: actions/upload-artifact@v4
         with:
-          name: BlueNotes-Final-APK
+          name: BlueNotes-Package
           path: drop/
           
