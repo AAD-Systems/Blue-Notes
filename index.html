@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Blue Notes — Anote em azul profundo</title>
+<meta name="description" content="Aplicativo Android de anotações minimalista. Tema azul escuro, 100% offline, sem conta."/>
+<meta property="og:title" content="Blue Notes"/>
+<meta property="og:description" content="Anote em azul profundo. App Android gratuito e open-source."/>
+<meta property="og:image" content="https://AAD-Systems.github.io/Blue-Notes/preview.png"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔵</text></svg>"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+
+<style>
+/* ─── RESET & TOKENS ──────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #060e1a;
+  --bg2:       #0a1628;
+  --surface:   #0f1f36;
+  --card:      #132030;
+  --border:    #1a3050;
+  --accent:    #2e86c1;
+  --accent2:   #5dade2;
+  --accent3:   #1a5276;
+  --gold:      #f1c40f;
+  --text:      #e8f4fd;
+  --muted:     #7fb3d3;
+  --faint:     #2c4a6a;
+  --danger:    #e74c3c;
+  --success:   #27ae60;
+  --font-head: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --r:         16px;
+  --r2:        24px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+::selection { background: var(--accent); color: #fff; }
+
+/* ─── NOISE OVERLAY ──────────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0; opacity: 0.4;
+}
+
+/* ─── NAV ─────────────────────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 40px;
+  background: rgba(6,14,26,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  transition: padding .3s;
+}
+
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-head); font-weight: 800; font-size: 1.2rem;
+  color: var(--text); text-decoration: none;
+}
+
+.nav-logo .dot {
+  width: 32px; height: 32px; border-radius: 9px;
+  background: linear-gradient(135deg, var(--accent), var(--accent3));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 800; color: white;
+  box-shadow: 0 0 16px rgba(46,134,193,0.5);
+}
+
+.nav-links { display: flex; gap: 32px; list-style: none; }
+
+.nav-links a {
+  color: var(--muted); text-decoration: none; font-size: .9rem;
+  font-weight: 500; transition: color .2s;
+}
+.nav-links a:hover { color: var(--text); }
+
+.nav-cta {
+  background: var(--accent); color: white; border: none;
+  padding: 9px 22px; border-radius: 10px;
+  font-family: var(--font-body); font-size: .9rem; font-weight: 500;
+  cursor: pointer; text-decoration: none;
+  transition: background .2s, transform .15s, box-shadow .2s;
+  box-shadow: 0 0 20px rgba(46,134,193,0.3);
+}
+.nav-cta:hover {
+  background: var(--accent2); transform: translateY(-1px);
+  box-shadow: 0 0 30px rgba(93,173,226,0.4);
+}
+
+/* ─── HERO ────────────────────────────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 120px 24px 80px;
+  position: relative; overflow: hidden;
+  text-align: center;
+}
+
+/* animated grid background */
+.hero::after {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(46,134,193,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(46,134,193,0.06) 1px, transparent 1px);
+  background-size: 48px 48px;
+  animation: gridMove 20s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes gridMove {
+  0%   { background-position: 0 0; }
+  100% { background-position: 48px 48px; }
+}
+
+/* glow blobs */
+.blob {
+  position: absolute; border-radius: 50%;
+  filter: blur(80px); opacity: 0.18; pointer-events: none;
+}
+.blob-1 { width:500px;height:500px;background:var(--accent); top:-100px;left:-100px; animation: float1 12s ease-in-out infinite; }
+.blob-2 { width:400px;height:400px;background:#1a3a6e; bottom:-80px;right:-80px; animation: float2 15s ease-in-out infinite; }
+.blob-3 { width:300px;height:300px;background:#0b4f6c; top:40%;left:60%; animation: float1 10s ease-in-out infinite reverse; }
+
+@keyframes float1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(30px,-30px)} }
+@keyframes float2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-20px,20px)} }
+
+.hero-content { position: relative; z-index: 1; max-width: 760px; }
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(46,134,193,0.12); border: 1px solid rgba(46,134,193,0.3);
+  padding: 6px 16px; border-radius: 100px; margin-bottom: 32px;
+  font-size: .8rem; color: var(--accent2); font-weight: 500;
+  animation: fadeDown .8s ease both;
+}
+
+.hero-badge .pulse {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--success);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+@keyframes fadeDown { from{opacity:0;transform:translateY(-20px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeUp   { from{opacity:0;transform:translateY(20px)}  to{opacity:1;transform:translateY(0)} }
+@keyframes fadeIn   { from{opacity:0} to{opacity:1} }
+
+.hero h1 {
+  font-family: var(--font-head); font-size: clamp(2.8rem, 8vw, 5.5rem);
+  font-weight: 800; line-height: 1.05; letter-spacing: -0.03em;
+  animation: fadeUp .9s .1s ease both;
+}
+
+.hero h1 span {
+  background: linear-gradient(135deg, var(--accent2), var(--accent), #5b8fd4);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-sub {
+  margin-top: 20px; font-size: 1.15rem; color: var(--muted);
+  max-width: 520px; margin-inline: auto;
+  animation: fadeUp .9s .2s ease both;
+}
+
+.hero-actions {
+  margin-top: 40px; display: flex; gap: 14px;
+  justify-content: center; flex-wrap: wrap;
+  animation: fadeUp .9s .3s ease both;
+}
+
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--accent); color: white; text-decoration: none;
+  padding: 14px 32px; border-radius: 14px;
+  font-weight: 600; font-size: 1rem;
+  box-shadow: 0 0 40px rgba(46,134,193,0.4);
+  transition: all .2s;
+}
+.btn-primary:hover { background: var(--accent2); transform: translateY(-2px); box-shadow: 0 0 60px rgba(93,173,226,0.5); }
+
+.btn-secondary {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: transparent; color: var(--text); text-decoration: none;
+  padding: 14px 32px; border-radius: 14px;
+  border: 1px solid var(--border); font-weight: 500; font-size: 1rem;
+  transition: all .2s;
+}
+.btn-secondary:hover { background: var(--surface); border-color: var(--accent); color: var(--accent2); }
+
+.hero-meta {
+  margin-top: 20px; font-size: .82rem; color: var(--faint);
+  animation: fadeIn 1s .5s ease both;
+}
+
+/* ─── PHONE MOCKUP ────────────────────────────────────────────────── */
+.phones-wrap {
+  margin-top: 80px; position: relative; display: flex;
+  justify-content: center; gap: -40px; perspective: 1000px;
+  animation: fadeUp 1s .4s ease both;
+}
+
+.phone {
+  width: 220px; flex-shrink: 0;
+  background: #0a1f35;
+  border-radius: 36px;
+  border: 2px solid var(--border);
+  padding: 12px;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(46,134,193,0.1), inset 0 1px 0 rgba(255,255,255,0.05);
+  transition: transform .3s;
+}
+
+.phone:nth-child(1) { transform: rotateY(12deg) rotateX(4deg) translateX(20px); z-index: 1; }
+.phone:nth-child(2) { transform: rotateY(-4deg) rotateX(2deg) scale(1.06); z-index: 3; }
+.phone:nth-child(3) { transform: rotateY(-12deg) rotateX(4deg) translateX(-20px); z-index: 1; }
+
+.phones-wrap:hover .phone:nth-child(1) { transform: rotateY(8deg) rotateX(2deg) translateX(10px); }
+.phones-wrap:hover .phone:nth-child(2) { transform: rotateY(0) rotateX(0) scale(1.08); }
+.phones-wrap:hover .phone:nth-child(3) { transform: rotateY(-8deg) rotateX(2deg) translateX(-10px); }
+
+.phone-notch {
+  width: 80px; height: 22px; background: #060e1a;
+  border-radius: 11px; margin: 0 auto 10px;
+}
+
+.phone-screen {
+  background: var(--bg2); border-radius: 26px; overflow: hidden;
+  height: 380px; position: relative;
+}
+
+/* ── Screen 1: Home ── */
+.screen-home { padding: 16px 12px; }
+
+.s-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.s-topbar-title { font-family: var(--font-head); font-size: .95rem; font-weight: 800; color: var(--text); }
+.s-topbar-icon { width: 28px; height: 28px; border-radius: 8px; background: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 12px; }
+
+.s-section-label { font-size: .62rem; font-weight: 700; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 8px; }
+
+.s-note {
+  background: var(--card); border-radius: 12px; padding: 10px 12px;
+  margin-bottom: 8px; border: 1px solid var(--border);
+}
+.s-note-title { font-size: .72rem; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.s-note-body  { font-size: .6rem;  color: var(--muted); line-height: 1.4; }
+.s-note-date  { font-size: .54rem; color: var(--faint); margin-top: 5px; }
+
+.s-note.pinned { background: #0b3a5a; border-color: #1a5276; }
+.s-note.color2 { background: #0b2e1c; border-color: #145a32; }
+
+.s-fab {
+  position: absolute; bottom: 14px; right: 14px;
+  width: 40px; height: 40px; border-radius: 20px;
+  background: var(--accent); display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 300; color: white;
+  box-shadow: 0 0 20px rgba(46,134,193,0.5);
+}
+
+/* ── Screen 2: Editor ── */
+.screen-editor { padding: 14px 12px; }
+.s-back { font-size: .6rem; color: var(--accent2); margin-bottom: 12px; }
+.s-editor-title { font-family: var(--font-head); font-size: 1rem; font-weight: 800; color: var(--text); margin-bottom: 8px; line-height: 1.2; }
+.s-divider { height: 1px; background: var(--border); margin: 8px 0; }
+.s-editor-body { font-size: .65rem; color: var(--muted); line-height: 1.7; }
+.s-toolbar { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.s-chip { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 2px 8px; font-size: .56rem; color: var(--muted); }
+.s-save { margin-top: auto; position: absolute; bottom: 14px; right: 14px; background: var(--accent); color: white; border-radius: 8px; padding: 4px 12px; font-size: .6rem; font-weight: 600; }
+.s-autosave { position: absolute; bottom: 18px; left: 12px; font-size: .54rem; color: var(--success); }
+
+/* ── Screen 3: Sidebar ── */
+.screen-sidebar { display: flex; height: 100%; }
+.s-sidebar { width: 68%; background: #0a1628; padding: 16px 12px; border-right: 1px solid var(--border); }
+.s-sidebar-header { margin-bottom: 14px; }
+.s-sidebar-logo { font-family: var(--font-head); font-weight: 800; font-size: .85rem; color: var(--text); }
+.s-sidebar-ver { font-size: .54rem; color: var(--faint); }
+.s-nav-item { display: flex; align-items: center; gap: 7px; padding: 6px 8px; border-radius: 8px; margin-bottom: 2px; font-size: .62rem; color: var(--muted); }
+.s-nav-item.active { background: rgba(46,134,193,0.15); color: var(--accent2); border-left: 2px solid var(--accent); }
+.s-nav-item span { font-size: 12px; }
+.s-overlay { flex: 1; background: rgba(0,0,0,0.5); }
+
+/* ─── FEATURES SECTION ────────────────────────────────────────────── */
+section { padding: 100px 24px; position: relative; }
+
+.section-label {
+  font-size: .78rem; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 12px;
+}
+
+.section-title {
+  font-family: var(--font-head); font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 800; line-height: 1.1; letter-spacing: -0.02em;
+  margin-bottom: 16px;
+}
+
+.section-sub { color: var(--muted); font-size: 1rem; max-width: 520px; }
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px; margin-top: 56px;
+}
+
+.feat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r2); padding: 28px;
+  transition: border-color .25s, transform .25s, box-shadow .25s;
+  position: relative; overflow: hidden;
+}
+
+.feat-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0; transition: opacity .3s;
+}
+
+.feat-card:hover {
+  border-color: rgba(46,134,193,0.4);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(46,134,193,0.1);
+}
+.feat-card:hover::before { opacity: 1; }
+
+.feat-icon {
+  width: 48px; height: 48px; border-radius: 14px; margin-bottom: 18px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  background: rgba(46,134,193,0.1); border: 1px solid rgba(46,134,193,0.2);
+}
+
+.feat-title { font-family: var(--font-head); font-weight: 700; font-size: 1.05rem; margin-bottom: 8px; }
+.feat-desc  { color: var(--muted); font-size: .9rem; line-height: 1.6; }
+
+/* ─── CHANGELOG ───────────────────────────────────────────────────── */
+.changelog-wrap { max-width: 760px; margin: 56px auto 0; }
+
+.version-block { margin-bottom: 48px; opacity: 0; transform: translateY(20px); transition: all .5s ease; }
+.version-block.visible { opacity: 1; transform: translateY(0); }
+
+.version-header {
+  display: flex; align-items: center; gap: 16px; margin-bottom: 20px;
+}
+
+.version-tag {
+  font-family: var(--font-head); font-size: 1.4rem; font-weight: 800;
+}
+
+.version-date {
+  font-size: .8rem; color: var(--muted);
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 3px 12px; border-radius: 100px;
+}
+
+.badge-latest {
+  font-size: .72rem; font-weight: 700; padding: 3px 10px;
+  background: rgba(39,174,96,0.15); border: 1px solid rgba(39,174,96,0.4);
+  color: var(--success); border-radius: 100px;
+}
+
+.badge-pre {
+  font-size: .72rem; font-weight: 700; padding: 3px 10px;
+  background: rgba(241,196,15,0.1); border: 1px solid rgba(241,196,15,0.3);
+  color: var(--gold); border-radius: 100px;
+}
+
+.version-changes { display: flex; flex-direction: column; gap: 6px; }
+
+.change-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 16px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; font-size: .9rem;
+}
+
+.change-type {
+  font-size: .7rem; font-weight: 700; padding: 2px 8px;
+  border-radius: 6px; flex-shrink: 0; margin-top: 1px;
+}
+
+.type-feat   { background: rgba(46,134,193,0.15); color: var(--accent2); }
+.type-fix    { background: rgba(231,76,60,0.15);  color: #f1948a; }
+.type-style  { background: rgba(155,89,182,0.15); color: #c39bd3; }
+.type-chore  { background: rgba(127,179,211,0.1); color: var(--muted); }
+
+.timeline-line {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 2px; background: linear-gradient(to bottom, var(--accent), transparent);
+  margin-left: -20px;
+}
+
+/* ─── ROADMAP ─────────────────────────────────────────────────────── */
+.roadmap-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px; margin-top: 48px;
+}
+
+.roadmap-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 16px; border-radius: 14px;
+  border: 1px solid var(--border); background: var(--surface);
+}
+
+.roadmap-check {
+  width: 20px; height: 20px; border-radius: 6px; flex-shrink: 0;
+  border: 2px solid var(--border); margin-top: 1px;
+}
+.roadmap-check.done { background: var(--accent); border-color: var(--accent); }
+
+.roadmap-text { font-size: .9rem; color: var(--muted); }
+.roadmap-text strong { color: var(--text); display: block; margin-bottom: 3px; }
+
+/* ─── DOWNLOAD SECTION ────────────────────────────────────────────── */
+.download-section {
+  background: linear-gradient(135deg, #0a1f38, #061525);
+  border: 1px solid var(--border);
+  border-radius: 32px; padding: 64px 40px;
+  text-align: center; max-width: 700px; margin: 0 auto;
+  position: relative; overflow: hidden;
+}
+
+.download-section::before {
+  content: '';
+  position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
+  width: 400px; height: 400px; border-radius: 50%;
+  background: rgba(46,134,193,0.06); filter: blur(60px); pointer-events: none;
+}
+
+.download-title {
+  font-family: var(--font-head); font-size: 2.4rem; font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.download-meta {
+  display: flex; justify-content: center; gap: 24px; flex-wrap: wrap;
+  margin: 28px 0; font-size: .85rem; color: var(--muted);
+}
+
+.download-meta span { display: flex; align-items: center; gap: 6px; }
+
+.btn-download {
+  display: inline-flex; align-items: center; gap: 12px;
+  background: var(--accent); color: white; text-decoration: none;
+  padding: 16px 40px; border-radius: 16px;
+  font-weight: 700; font-size: 1.1rem;
+  box-shadow: 0 0 60px rgba(46,134,193,0.5);
+  transition: all .25s; margin: 8px;
+}
+.btn-download:hover {
+  background: var(--accent2); transform: translateY(-3px);
+  box-shadow: 0 0 80px rgba(93,173,226,0.6);
+}
+
+.btn-source {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: transparent; color: var(--muted); text-decoration: none;
+  padding: 16px 32px; border-radius: 16px;
+  border: 1px solid var(--border); font-weight: 500; font-size: 1rem;
+  transition: all .25s; margin: 8px;
+}
+.btn-source:hover { border-color: var(--accent); color: var(--accent2); background: rgba(46,134,193,0.05); }
+
+.install-steps {
+  margin-top: 32px; text-align: left;
+  background: var(--bg2); border-radius: 14px; padding: 20px 24px;
+  border: 1px solid var(--border);
+}
+
+.install-steps p { font-size: .82rem; color: var(--muted); margin-bottom: 10px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
+
+.install-step {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 6px 0; font-size: .88rem; color: var(--text);
+}
+
+.step-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--accent3); display: flex; align-items: center;
+  justify-content: center; font-size: .7rem; font-weight: 700; flex-shrink: 0;
+}
+
+/* ─── FOOTER ──────────────────────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--border); padding: 40px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: gap; gap: 16px; max-width: 1200px; margin: 0 auto;
+}
+
+.footer-left { font-size: .85rem; color: var(--faint); }
+.footer-left strong { color: var(--muted); }
+
+.footer-links { display: flex; gap: 24px; }
+.footer-links a { color: var(--faint); text-decoration: none; font-size: .85rem; transition: color .2s; }
+.footer-links a:hover { color: var(--accent2); }
+
+/* ─── CONTAINER ───────────────────────────────────────────────────── */
+.container { max-width: 1200px; margin: 0 auto; }
+
+/* ─── SCROLL REVEAL ───────────────────────────────────────────────── */
+.reveal {
+  opacity: 0; transform: translateY(30px);
+  transition: opacity .6s ease, transform .6s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ─── RESPONSIVE ──────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  nav { padding: 14px 20px; }
+  .nav-links { display: none; }
+  .phones-wrap { gap: 0; }
+  .phone:nth-child(1), .phone:nth-child(3) { display: none; }
+  .phone:nth-child(2) { transform: none; }
+  .download-section { padding: 40px 20px; }
+  footer { flex-direction: column; text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .hero h1 { font-size: 2.4rem; }
+  .hero-actions { flex-direction: column; align-items: center; }
+  .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+}
+
+/* ─── CUSTOM SCROLLBAR ────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent3); }
+</style>
+</head>
+<body>
+
+<!-- ── NAV ──────────────────────────────────────────────────────────── -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="dot">BN</div>
+    Blue Notes
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Funcionalidades</a></li>
+    <li><a href="#changelog">Changelog</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#download">Download</a></li>
+  </ul>
+  <a href="#download" class="nav-cta">⬇ Baixar APK</a>
+</nav>
+
+<!-- ── HERO ─────────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="pulse"></span>
+      v0.0.0.0.1 disponível agora
+    </div>
+
+    <h1>Anote em<br/><span>azul profundo</span></h1>
+
+    <p class="hero-sub">
+      Aplicativo Android minimalista para suas anotações.
+      100% offline, sem conta, sem rastreamento. Só você e suas ideias.
+    </p>
+
+    <div class="hero-actions">
+      <a href="https://github.com/AAD-Systems/Blue-Notes/releases/latest/download/BlueNotes-APK.zip"
+         class="btn-primary">
+        ⬇ Baixar APK Grátis
+      </a>
+      <a href="https://github.com/AAD-Systems/Blue-Notes" class="btn-secondary" target="_blank">
+        ⭐ Ver no GitHub
+      </a>
+    </div>
+
+    <p class="hero-meta">Android 7.0+ · ~30MB · Open Source · MIT License</p>
+  </div>
+
+  <!-- Phone Mockups -->
+  <div class="phones-wrap">
+
+    <!-- Phone 1: Sidebar -->
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+        <div class="screen-sidebar">
+          <div class="s-sidebar">
+            <div class="s-sidebar-header">
+              <div class="s-sidebar-logo">🔵 Blue Notes</div>
+              <div class="s-sidebar-ver">v0.0.0.0.1</div>
+            </div>
+            <div class="s-nav-item active"><span>🏠</span> Início</div>
+            <div class="s-nav-item"><span>📓</span> Cadernos</div>
+            <div class="s-nav-item"><span>🏷️</span> Etiquetas</div>
+            <div class="s-nav-item"><span>🔍</span> Busca</div>
+            <div style="height:1px;background:var(--border);margin:8px 0"></div>
+            <div class="s-nav-item"><span>🗄️</span> Arquivo</div>
+            <div class="s-nav-item"><span>🗑️</span> Lixeira</div>
+            <div style="height:1px;background:var(--border);margin:8px 0"></div>
+            <div class="s-nav-item"><span>⚙️</span> Config.</div>
+            <div class="s-nav-item"><span>👤</span> Perfil</div>
+          </div>
+          <div class="s-overlay"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phone 2: Home (center) -->
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+        <div class="screen-home">
+          <div class="s-topbar">
+            <div class="s-topbar-title">Minhas Notas</div>
+            <div class="s-topbar-icon">🔍</div>
+          </div>
+          <div class="s-section-label">📌 Fixadas</div>
+          <div class="s-note pinned">
+            <div class="s-note-title">📌 Ideias do projeto</div>
+            <div class="s-note-body">Sistema de sync offline, exportar para PDF...</div>
+            <div class="s-note-date">24/04 · 312 palavras</div>
+          </div>
+          <div class="s-section-label" style="margin-top:10px">Recentes</div>
+          <div class="s-note">
+            <div class="s-note-title">Reunião segunda-feira</div>
+            <div class="s-note-body">Pauta: revisão de sprint, deploy da v2...</div>
+            <div class="s-note-date">23/04 · 89 palavras</div>
+          </div>
+          <div class="s-note color2">
+            <div class="s-note-title">Lista de compras 🛒</div>
+            <div class="s-note-body">Leite, ovos, pão integral, café...</div>
+            <div class="s-note-date">22/04 · 14 palavras</div>
+          </div>
+          <div class="s-fab">+</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phone 3: Editor -->
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+        <div class="screen-editor">
+          <div class="s-back">← Início</div>
+          <div class="s-editor-title">Ideias do projeto Blue Notes</div>
+          <div class="s-toolbar">
+            <div class="s-chip">A</div>
+            <div class="s-chip">🎨</div>
+            <div class="s-chip">PDF</div>
+            <div class="s-chip">🔒</div>
+            <div class="s-chip" style="color:var(--muted);font-size:.52rem">312 palavras</div>
+          </div>
+          <div class="s-divider" style="margin-top:8px"></div>
+          <div class="s-editor-body">
+            Sistema de sync offline com backup local em JSON. Suporte a Markdown para formatação avançada. Widget Android para criação rápida de notas na tela inicial. Notificações de lembrete configuráveis por nota. Tema claro opcional...
+          </div>
+          <div class="s-autosave">✓ Salvo às 14:32</div>
+          <div class="s-save">Salvar</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── FEATURES ──────────────────────────────────────────────────────── -->
+<section id="features">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Funcionalidades</div>
+      <h2 class="section-title">Tudo que você precisa.<br/>Nada que você não quer.</h2>
+      <p class="section-sub">10 funcionalidades core pensadas para quem quer anotar rápido, sem distrações.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feat-card reveal">
+        <div class="feat-icon">📝</div>
+        <div class="feat-title">Editor inteligente</div>
+        <div class="feat-desc">Auto-save a cada 3 segundos. Contador de palavras e caracteres em tempo real. Nunca perca uma ideia.</div>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">📓</div>
+        <div class="feat-title">Cadernos</div>
+        <div class="feat-desc">Organize suas notas em cadernos com cor e ícone personalizados. Estrutura visual que faz sentido.</div>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">🏷️</div>
+        <div class="feat-title">Etiquetas</div>
+        <div class="feat-desc">Múltiplas tags por nota. Filtre por etiqueta. Badge mostra quantas notas cada tag possui.</div>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">🔍</div>
+        <div class="feat-title">Busca global</div>
+        <div class="feat-desc">Busca em tempo real com debounce de 300ms. Histórico de pesquisas. Resultados por título, corpo, tag ou caderno.</div>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">📌</div>
+        <div class="feat-title">Notas fixadas</div>
+        <div class="feat-desc">Fixe até 5 notas no topo do feed. Swipe para fixar, arquivar ou excluir diretamente da lista.</div>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">🗄️</div>
+        <div class="feat-title">Arquivo & Lixeira</div>
+        <div class="feat-desc">Arquive notas sem excluir. Lixeira com auto-limpeza em 30 dias. Restaure com um toque.</div>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">🎨</div>
+        <div class="feat-title">Personalização</div>
+        <div class="feat-desc">8 cores de fundo por nota em tons de azul profundo. 3 tamanhos de fonte. Visual totalmente dark.</div>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">🔒</div>
+        <div class="feat-title">Proteção</div>
+        <div class="feat-desc">Trave notas individuais com PIN de 4 dígitos ou autenticação biométrica nativa do Android.</div>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">📤</div>
+        <div class="feat-title">Exportação</div>
+        <div class="feat-desc">Exporte qualquer nota como .TXT ou .PDF. Compartilhe via WhatsApp, e-mail ou qualquer app.</div>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">⚙️</div>
+        <div class="feat-title">Configurações</div>
+        <div class="feat-desc">Tema, idioma, ordenação, auto-save e dias da lixeira. Tudo configurável a seu gosto.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CHANGELOG ─────────────────────────────────────────────────────── -->
+<section id="changelog" style="background: linear-gradient(180deg, transparent, rgba(10,22,40,0.5), transparent)">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Histórico de versões</div>
+      <h2 class="section-title">Changelog</h2>
+      <p class="section-sub">Cada atualização documentada, transparente para toda a comunidade.</p>
+    </div>
+
+    <div class="changelog-wrap">
+
+      <!-- v0.0.0.0.1 -->
+      <div class="version-block reveal">
+        <div class="version-header">
+          <span class="version-tag">v0.0.0.0.1</span>
+          <span class="version-date">23 abr 2025</span>
+          <span class="badge-latest">● Latest</span>
+          <span class="badge-pre">Pre-release</span>
+        </div>
+        <div class="version-changes">
+          <div class="change-item"><span class="change-type type-feat">feat</span>Criação e edição de notas com auto-save (3s) e contador de palavras</div>
+          <div class="change-item"><span class="change-type type-feat">feat</span>Sistema de cadernos com ícone e cor personalizável</div>
+          <div class="change-item"><span class="change-type type-feat">feat</span>Sistema de etiquetas (tags) com badge de contagem de uso</div>
+          <div class="change-item"><span class="change-type type-feat">feat</span>Busca global em tempo real com debounce de 300ms</div>
+          <div class="change-item"><span class="change-type type-feat">feat</span>Notas fixadas (pin) no topo do feed</div>
+          <div class="change-item"><span class="change-type type-feat">feat</span>Arquivo e lixeira com auto-limpeza em 30 dias configuráveis</div>
+          <div class="change-item"><span class="change-type type-feat">feat</span>Exportação em .TXT e .PDF com compartilhamento nativo Android</div>
+          <div class="change-item"><span class="change-type type-feat">feat</span>Proteção de notas por PIN e biometria</div>
+          <div class="change-item"><span class="change-type type-feat">feat</span>Sidebar animada com todas as seções de navegação</div>
+          <div class="change-item"><span class="change-type type-feat">feat</span>Personalização de cor (8 tons) e tamanho de fonte por nota</div>
+          <div class="change-item"><span class="change-type type-feat">feat</span>Banco de dados SQLite local — 100% offline, sem conta</div>
+          <div class="change-item"><span class="change-type type-style">style</span>Tema azul escuro completo em todas as telas</div>
+          <div class="change-item"><span class="change-type type-style">style</span>Animações de entrada: Fade, SlideX e SlideY por tela</div>
+          <div class="change-item"><span class="change-type type-chore">chore</span>CI/CD com GitHub Actions — build APK automático por tag</div>
+        </div>
+      </div>
+
+      <!-- Próxima versão placeholder -->
+      <div class="version-block reveal" style="opacity:.4">
+        <div class="version-header">
+          <span class="version-tag" style="color:var(--faint)">v0.0.0.0.2</span>
+          <span class="version-date">em breve</span>
+        </div>
+        <div class="version-changes">
+          <div class="change-item" style="opacity:.5"><span class="change-type type-feat">feat</span>Suporte a Markdown no editor</div>
+          <div class="change-item" style="opacity:.5"><span class="change-type type-feat">feat</span>Widget Android para criação rápida de notas</div>
+          <div class="change-item" style="opacity:.5"><span class="change-type type-feat">feat</span>Tema claro (light mode)</div>
+          <div class="change-item" style="opacity:.5"><span class="change-type type-style">style</span>Drag & drop para reordenar notas fixadas</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── ROADMAP ────────────────────────────────────────────────────────── -->
+<section id="roadmap">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Roadmap</div>
+      <h2 class="section-title">O que vem por aí</h2>
+      <p class="section-sub">O desenvolvimento é aberto. Sugira features abrindo uma Issue no GitHub.</p>
+    </div>
+    <div class="roadmap-grid">
+      <div class="roadmap-item reveal">
+        <div class="roadmap-check done"></div>
+        <div class="roadmap-text"><strong>Editor com auto-save</strong>v0.0.0.0.1 ✓</div>
+      </div>
+      <div class="roadmap-item reveal">
+        <div class="roadmap-check done"></div>
+        <div class="roadmap-text"><strong>Banco de dados local SQLite</strong>v0.0.0.0.1 ✓</div>
+      </div>
+      <div class="roadmap-item reveal">
+        <div class="roadmap-check done"></div>
+        <div class="roadmap-text"><strong>Exportação PDF / TXT</strong>v0.0.0.0.1 ✓</div>
+      </div>
+      <div class="roadmap-item reveal">
+        <div class="roadmap-check done"></div>
+        <div class="roadmap-text"><strong>CI/CD GitHub Actions</strong>v0.0.0.0.1 ✓</div>
+      </div>
+      <div class="roadmap-item reveal">
+        <div class="roadmap-check"></div>
+        <div class="roadmap-text"><strong>Markdown no editor</strong>v0.0.0.0.2</div>
+      </div>
+      <div class="roadmap-item reveal">
+        <div class="roadmap-check"></div>
+        <div class="roadmap-text"><strong>Widget Android</strong>v0.0.0.0.2</div>
+      </div>
+      <div class="roadmap-item reveal">
+        <div class="roadmap-check"></div>
+        <div class="roadmap-text"><strong>Tema claro</strong>v0.0.0.0.2</div>
+      </div>
+      <div class="roadmap-item reveal">
+        <div class="roadmap-check"></div>
+        <div class="roadmap-text"><strong>Backup local JSON</strong>v0.0.0.1.0</div>
+      </div>
+      <div class="roadmap-item reveal">
+        <div class="roadmap-check"></div>
+        <div class="roadmap-text"><strong>Notificações de lembrete</strong>v0.0.0.1.0</div>
+      </div>
+      <div class="roadmap-item reveal">
+        <div class="roadmap-check"></div>
+        <div class="roadmap-text"><strong>Sync Google Drive (opcional)</strong>v0.1.0.0</div>
+      </div>
+      <div class="roadmap-item reveal">
+        <div class="roadmap-check"></div>
+        <div class="roadmap-text"><strong>Imagens embutidas nas notas</strong>v0.1.0.0</div>
+      </div>
+      <div class="roadmap-item reveal">
+        <div class="roadmap-check"></div>
+        <div class="roadmap-text"><strong>Tema totalmente customizável</strong>v0.1.0.0</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── DOWNLOAD ───────────────────────────────────────────────────────── -->
+<section id="download">
+  <div class="container">
+    <div class="download-section reveal">
+      <div class="section-label" style="text-align:center">Download</div>
+      <div class="download-title">Pronto para usar</div>
+      <p style="color:var(--muted);margin-top:8px">Grátis. Para sempre. Sem anúncios.</p>
+
+      <div class="download-meta">
+        <span>🤖 Android 7.0+</span>
+        <span>📦 ~30 MB</span>
+        <span>🔒 100% offline</span>
+        <span>📄 MIT License</span>
+      </div>
+
+      <div>
+        <a href="https://github.com/AAD-Systems/Blue-Notes/releases/latest/download/BlueNotes-APK.zip"
+           class="btn-download">
+          ⬇ Baixar APK · v0.0.0.0.1
+        </a>
+        <a href="https://github.com/AAD-Systems/Blue-Notes/releases" class="btn-source" target="_blank">
+          📋 Todas as versões
+        </a>
+      </div>
+
+      <div class="install-steps">
+        <p>Como instalar</p>
+        <div class="install-step">
+          <div class="step-num">1</div>
+          Baixe o arquivo <strong>.apk</strong> acima
+        </div>
+        <div class="install-step">
+          <div class="step-num">2</div>
+          Vá em <strong>Configurações → Segurança → Fontes desconhecidas</strong> e ative
+        </div>
+        <div class="install-step">
+          <div class="step-num">3</div>
+          Abra o arquivo .apk pelo gerenciador de arquivos e clique em <strong>Instalar</strong>
+        </div>
+        <div class="install-step">
+          <div class="step-num">4</div>
+          Pronto! Abra o <strong>Blue Notes</strong> 🔵
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-left">
+    <strong>🔵 Blue Notes</strong> · v0.0.0.0.1 · MIT License<br/>
+    © 2025 AAD-Systems. Open source com ❤️
+  </div>
+  <div class="footer-links">
+    <a href="https://github.com/AAD-Systems/Blue-Notes" target="_blank">GitHub</a>
+    <a href="https://github.com/AAD-Systems/Blue-Notes/releases" target="_blank">Releases</a>
+    <a href="https://github.com/AAD-Systems/Blue-Notes/issues" target="_blank">Reportar bug</a>
+    <a href="https://github.com/AAD-Systems/Blue-Notes/blob/main/CHANGELOG.md" target="_blank">Changelog</a>
+  </div>
+</footer>
+
+<script>
+// ── Scroll Reveal ─────────────────────────────────────────────────────
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      // stagger children if version-block
+      if (e.target.classList.contains('version-block')) {
+        e.target.classList.add('visible');
+      }
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.reveal, .version-block').forEach(el => observer.observe(el));
+
+// ── Stagger feat cards ────────────────────────────────────────────────
+document.querySelectorAll('.feat-card').forEach((card, i) => {
+  card.style.transitionDelay = `${i * 60}ms`;
+});
+
+// ── Nav shrink on scroll ──────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const nav = document.querySelector('nav');
+  nav.style.padding = window.scrollY > 40 ? '10px 40px' : '16px 40px';
+});
+
+// ── Smooth active nav link highlight ─────────────────────────────────
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 120) current = s.id;
+  });
+  navLinks.forEach(a => {
+    a.style.color = a.getAttribute('href') === `#${current}` ? 'var(--accent2)' : '';
+  });
+});
+</script>
+</body>
+</html>
