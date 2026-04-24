@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest  # O segredo é usar Windows para evitar erro de Linux
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -19,8 +19,14 @@ jobs:
         run: dotnet workload install maui-android
 
       - name: 🔨 Build & Publish APK
+        shell: pwsh
         run: |
-          dotnet publish BlueNotes.csproj -f net9.0-android -c Release -p:AndroidPackageFormat=apk -p:AndroidKeyStore=false -p:PublishAndroidPackage=true
+          # Procura o arquivo csproj recursivamente
+          $projFile = Get-ChildItem -Filter *.csproj -Recurse | Select-Object -First 1 -ExpandProperty FullName
+          Write-Host "Compilando: $projFile"
+          
+          # Roda o comando usando a variável do caminho
+          dotnet publish "$projFile" -f net9.0-android -c Release -p:AndroidPackageFormat=apk -p:AndroidKeyStore=false -p:PublishAndroidPackage=true
 
       - name: 📤 Upload APK
         uses: actions/upload-artifact@v4
