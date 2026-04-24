@@ -32,13 +32,14 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 🛠️ Bypass EOL Block
+      - name: 🛠️ Bypass EOL & Version Mismatch
         run: |
           PROJECT_DIR=$(find . -name "*.csproj" -exec dirname {} \;)
           for dir in $PROJECT_DIR; do
             echo '<Project>
               <PropertyGroup>
                 <CheckEolTargetFramework>false</CheckEolTargetFramework>
+                <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == 'net8.0-android'">24.0</SupportedOSPlatformVersion>
               </PropertyGroup>
             </Project>' > "$dir/Directory.Build.props"
           done
@@ -47,11 +48,7 @@ jobs:
         run: |
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
           echo "🚀 Projeto encontrado: $PROJECT_FILE"
-          
-          # Instala exatamente o que o seu projeto MAUI precisa
           dotnet workload restore "$PROJECT_FILE"
-          
-          # Restore das dependências NuGet
           dotnet restore "$PROJECT_FILE" -p:CheckEolTargetFramework=false
 
       - name: 🔨 Build & Publish APK
