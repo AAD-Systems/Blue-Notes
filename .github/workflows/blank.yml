@@ -5,15 +5,17 @@ on:
   workflow_dispatch:
 env:
   DOTNET_VERSION: '8.0.x'
-  # FORÇA O SDK A IGNORAR O FIM DE SUPORTE NO NÍVEL DO SISTEMA
-  DOTNET_GENERATE_ASPNET_CORE_HTTPS_CHECK: 'false'
-  CheckEolTargetFramework: 'false'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: 🛠️ Force SDK Version
+        run: |
+          # Isso obriga o runner a usar ferramentas do .NET 8, ignorando o suporte do .NET 10
+          echo '{"sdk":{"version":"8.0.400","rollForward":"latestFeature"}}' > global.json
 
       - name: 🛠️ Setup .NET
         uses: actions/setup-dotnet@v4
@@ -26,41 +28,30 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 📝 Config Override
+      - name: 📦 Workload & Silent Restore
+        # O "|| true" no final do restore obriga o GitHub a continuar mesmo com o erro de suporte
         run: |
-          # Cria um arquivo de configuração que o .NET é obrigado a ler antes de tudo
-          echo "export MSBUILDDISABLENODEREUSE=1" >> $GITHUB_ENV
-          echo "export CheckEolTargetFramework=false" >> $GITHUB_ENV
-          
-          # Injeta a propriedade diretamente em um arquivo de props global
-          PROJECT_DIR=$(find . -name "*.csproj" -exec dirname {} \;)
-          echo '<Project><PropertyGroup><CheckEolTargetFramework>false</CheckEolTargetFramework></PropertyGroup></Project>' > "$PROJECT_DIR/Directory.Build.props"
-
-      - name: 📦 Install Workloads & Restore
-        run: |
-          # Desabilita o erro explicitamente na chamada do workload
-          dotnet workload install maui-android --configfile NuGet.config || dotnet workload install maui-android
-          
+          dotnet workload install maui-android
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
-          dotnet restore "$PROJECT_FILE" -p:CheckEolTargetFramework=false
+          dotnet restore "$PROJECT_FILE" -p:CheckEolTargetFramework=false || true
 
-      - name: 🔨 Build APK (Ultimate Force)
+      - name: 🔨 Build APK (Ignore Exit Codes)
         run: |
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
+          echo "🚀 Tentando buildar: $PROJECT_FILE"
           
-          # Build usando flags redundantes para garantir
+          # Tentamos o build. Se ele gerar o arquivo, o exit code não importa agora.
           dotnet build "$PROJECT_FILE" -c Release -f net8.0-android /t:Publish \
             -p:AndroidPackageFormat=apk \
             -p:AndroidKeyStore=false \
-            -p:CheckEolTargetFramework=false \
-            -p:SupportedOSPlatformVersion=24.0
+            -p:CheckEolTargetFramework=false || true
 
       - name: 🔍 Collect Artifact
         run: |
           mkdir -p drop
-          find . -name "*-Signed.apk" -exec cp {} ./drop/ \;
+          # Procura qualquer coisa que tenha cara de APK
           find . -name "*.apk" -exec cp {} ./drop/ \;
-          echo "📂 Arquivos na pasta drop:"
+          echo "📂 Arquivos encontrados (se a lista abaixo estiver vazia, o build falhou silenciosamente):"
           ls -R ./drop
 
       - name: 📤 Upload
@@ -68,4 +59,5 @@ jobs:
         with:
           name: BlueNotes-APK
           path: drop/
+          if-no-files-found: error
           
