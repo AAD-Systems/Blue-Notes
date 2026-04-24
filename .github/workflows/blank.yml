@@ -33,13 +33,12 @@ jobs:
       - name: Build_APK
         run: |
           PROJECT_FILE=$(find . -name "*.csproj" -print -quit)
-          # Mudamos para 'dotnet build' com target de Publish para garantir o APK
-          dotnet build "$PROJECT_FILE" -c Release -f net8.0-android -t:Publish -p:CheckEolTargetFramework=false -p:AndroidPackageFormat=apk -p:AndroidKeyStore=false
+          # Adicionamos a saída explícita para uma pasta chamada 'output'
+          dotnet publish "$PROJECT_FILE" -c Release -f net8.0-android -p:CheckEolTargetFramework=false -p:AndroidPackageFormat=apk -p:AndroidKeyStore=false -o ./output
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: BlueNotes-APK
-          path: |
-            **/*-Signed.apk
-            **/*.apk
-            
+          # Agora ele vai direto na pasta que mandamos criar
+          path: ./output/**/*.apk
+          
